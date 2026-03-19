@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assistant IA Restaurant</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--main:#FF6B00;--second:#FFD700;--bg:#f5f5f5;--chat-bg:#fff;--user-bg:var(--main);--bot-bg:#e9e9e9;--text:#222;--text-light:#fff}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.header{background:var(--main);color:var(--text-light);padding:16px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.header-icon{width:42px;height:42px;background:var(--second);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px}
+.header-info h1{font-size:16px;font-weight:600}
+.header-info p{font-size:12px;opacity:.85;margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;margin-top:4px}
+.badge::before{content:'';width:6px;height:6px;background:#4caf50;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.info-btn{margin-left:auto;background:rgba(255,255,255,.2);border:none;color:var(--text-light);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.info-btn:hover{background:rgba(255,255,255,.35)}
+.chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.msg{max-width:82%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg.bot{background:var(--bot-bg);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.user{background:var(--user-bg);color:var(--text-light);align-self:flex-end;border-bottom-right-radius:4px}
+.typing{align-self:flex-start;background:var(--bot-bg);padding:12px 20px;border-radius:18px;border-bottom-left-radius:4px;display:none;gap:4px}
+.typing span{width:7px;height:7px;background:#999;border-radius:50%;animation:bounce .6s infinite alternate}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{to{transform:translateY(-6px);opacity:.3}}
+.quick-btns{display:flex;flex-wrap:wrap;gap:8px;padding:8px 16px}
+.quick-btn{background:var(--chat-bg);border:1.5px solid var(--main);color:var(--main);padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.quick-btn:hover{background:var(--main);color:var(--text-light)}
+.input-area{display:flex;gap:8px;padding:12px 16px;background:var(--chat-bg);border-top:1px solid #e0e0e0}
+.input-area input{flex:1;border:1.5px solid #ddd;border-radius:24px;padding:12px 18px;font-size:14px;outline:none;transition:border .2s}
+.input-area input:focus{border-color:var(--main)}
+.input-area button{background:var(--main);color:var(--text-light);border:none;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.input-area button:hover{transform:scale(1.08)}
+.input-area button:active{transform:scale(.95)}
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:16px;padding:24px;max-width:400px;width:100%;max-height:80vh;overflow-y:auto}
+.modal h2{font-size:18px;margin-bottom:12px;color:var(--main)}
+.modal p{font-size:14px;line-height:1.6;color:#555;margin-bottom:8px}
+.modal-close{background:var(--main);color:#fff;border:none;padding:10px 24px;border-radius:20px;font-size:14px;cursor:pointer;margin-top:12px}
+.error-msg{background:#fff3f3;color:#d32f2f;border:1px solid #ffcdd2;padding:10px 14px;border-radius:12px;font-size:13px;align-self:center;text-align:center}
+@media(max-width:480px){.msg{max-width:90%}.header{padding:12px 14px}.quick-btn{font-size:12px;padding:6px 10px}}
+</style>
+</head>
+<body>
+<div class="header" id="header">
+<div class="header-icon" id="headerIcon">🍽️</div>
+<div class="header-info">
+<h1 id="restoName">Chargement...</h1>
+<p id="restoType"></p>
+<div class="badge">Assistant IA • En ligne 24/7</div>
+</div>
+<button class="info-btn" onclick="toggleInfo()" title="Informations">ℹ️</button>
+</div>
+<div class="chat-area" id="chatArea"></div>
+<div class="typing" id="typing"><span></span><span></span><span></span></div>
+<div class="quick-btns" id="quickBtns"></div>
+<div class="input-area">
+<input type="text" id="userInput" placeholder="Votre message..." autocomplete="off">
+<button onclick="sendMessage()" id="sendBtn">➤</button>
+</div>
+<div class="modal-overlay" id="modalOverlay" onclick="toggleInfo()">
+<div class="modal" onclick="event.stopPropagation()">
+<h2 id="modalTitle">Informations</h2>
+<div id="modalContent"></div>
+<button class="modal-close" onclick="toggleInfo()">Fermer</button>
+</div>
+</div>
+<script>
+const WEBHOOK_URL='https://hook.eu1.make.com/4loqm3jex6phgi9g2grs7udk7dkibylm';
+const params=new URLSearchParams(window.location.search);
+const restoId=params.get('resto')||'';
+let chatHistory=[];
+let restoData=null;
+const quickQuestions=['📋 Voir le menu','⏰ Horaires','📍 Adresse','📞 Réserver une table','🥜 Allergènes'];
+
+function addMessage(text,type){
+const chatArea=document.getElementById('chatArea');
+const div=document.createElement('div');
+div.className='msg '+type;
+div.textContent=text;
+chatArea.appendChild(div);
+chatArea.scrollTop=chatArea.scrollHeight;
+}
+
+function showTyping(show){
+document.getElementById('typing').style.display=show?'flex':'none';
+const chatArea=document.getElementById('chatArea');
+chatArea.scrollTop=chatArea.scrollHeight;
+}
+
+function showError(msg){
+const chatArea=document.getElementById('chatArea');
+const div=document.createElement('div');
+div.className='error-msg';
+div.textContent=msg;
+chatArea.appendChild(div);
+chatArea.scrollTop=chatArea.scrollHeight;
+}
+
+function setColors(main,second){
+document.documentElement.style.setProperty('--main',main||'#FF6B00');
+document.documentElement.style.setProperty('--second',second||'#FFD700');
+}
+
+function renderQuickBtns(){
+const container=document.getElementById('quickBtns');
+container.innerHTML='';
+quickQuestions.forEach(q=>{
+const btn=document.createElement('button');
+btn.className='quick-btn';
+btn.textContent=q;
+btn.onclick=()=>{
+document.getElementById('userInput').value=q;
+sendMessage();
+};
+container.appendChild(btn);
+});
+}
+
+function toggleInfo(){
+const overlay=document.getElementById('modalOverlay');
+if(overlay.style.display==='flex'){overlay.style.display='none';return;}
+if(!restoData){return;}
+const d=restoData;
+let html='';
+html+='<p><strong>Adresse :</strong> '+d.adresse+', '+d.ville+'</p>';
+html+='<p><strong>Téléphone :</strong> '+d.telephone+'</p>';
+html+='<p><strong>Horaires :</strong> '+d.horaires+'</p>';
+html+='<p><strong>Cuisine :</strong> '+d.type_cuisine+'</p>';
+if(d.halal)html+='<p>✅ Certifié Halal</p>';
+if(d.allergenes)html+='<p><strong>Allergènes :</strong> '+d.allergenes+'</p>';
+document.getElementById('modalTitle').textContent=d.nom;
+document.getElementById('modalContent').innerHTML=html;
+overlay.style.display='flex';
+}
+
+async function sendMessage(){
+const input=document.getElementById('userInput');
+const text=input.value.trim();
+if(!text)return;
+input.value='';
+addMessage(text,'user');
+chatHistory.push({role:'user',content:text});
+showTyping(true);
+document.getElementById('quickBtns').style.display='none';
+try{
+const resp=await fetch(WEBHOOK_URL,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({resto_id:restoId,message:text,history:chatHistory.slice(-6)})
+});
+const data=await resp.json();
+showTyping(false);
+if(data.reply){
+addMessage(data.reply,'bot');
+chatHistory.push({role:'assistant',content:data.reply});
+if(!restoData&&data.resto){
+restoData=data.resto;
+document.getElementById('restoName').textContent=data.resto.nom||'Restaurant';
+document.getElementById('restoType').textContent=data.resto.type_cuisine||'';
+setColors(data.resto.couleur_principale,data.resto.couleur_secondaire);
+}
+}else if(data.error){
+showError(data.error);
+}else{
+showError('Réponse inattendue du serveur.');
+}
+}catch(e){
+showTyping(false);
+showError('Erreur de connexion. Veuillez réessayer.');
+}
+}
+
+document.getElementById('userInput').addEventListener('keydown',function(e){
+if(e.key==='Enter')sendMessage();
+});
+
+(async function init(){
+if(!restoId){
+showError('Aucun restaurant spécifié. Vérifiez le lien.');
+return;
+}
+showTyping(true);
+try{
+const resp=await fetch(WEBHOOK_URL,{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({resto_id:restoId,message:'__init__',history:[]})
+});
+const data=await resp.json();
+showTyping(false);
+if(data.resto){
+restoData=data.resto;
+document.getElementById('restoName').textContent=data.resto.nom;
+document.getElementById('restoType').textContent=data.resto.type_cuisine||'';
+setColors(data.resto.couleur_principale,data.resto.couleur_secondaire);
+document.title=data.resto.nom+' - Assistant IA';
+}
+if(data.reply){
+addMessage(data.reply,'bot');
+chatHistory.push({role:'assistant',content:data.reply});
+}
+renderQuickBtns();
+}catch(e){
+showTyping(false);
+showError('Impossible de charger les informations du restaurant.');
+renderQuickBtns();
+}
+})();
+</script>
+</body>
+</html>
