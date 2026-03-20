@@ -251,7 +251,23 @@
       else{b.style.display='none';}
     }
 
-    function safeParseJSON(text){
+    function buildContextSummary(){
+        var parts=[];
+        if(conversationContext.customer_name)parts.push('Nom: '+conversationContext.customer_name);
+        if(conversationContext.customer_party_size)parts.push('Personnes: '+conversationContext.customer_party_size);
+        if(conversationContext.customer_date)parts.push('Date: '+conversationContext.customer_date);
+        if(conversationContext.customer_time)parts.push('Heure: '+conversationContext.customer_time);
+        if(conversationContext.customer_allergies.length)parts.push('Allergies: '+conversationContext.customer_allergies.join(', '));
+        if(conversationContext.visit_type)parts.push('Type: '+conversationContext.visit_type);
+        if(conversationContext.has_children)parts.push('Enfants: oui');
+        if(conversationContext.is_group)parts.push('Groupe: oui');
+        if(conversationContext.conversation_mood!=='neutral')parts.push('Mood: '+conversationContext.conversation_mood);
+        if(conversationContext.reservation_in_progress)parts.push('Reservation: en cours');
+        parts.push('Stage: '+conversationContext.conversation_stage);
+        parts.push('Messages: '+conversationHistory.length);
+        return parts.join(' | ');
+      }
+      function safeParseJSON(text){
       try{return JSON.parse(text);}catch(e){
         var cleaned=text.replace(/[\x00-\x1f\x7f]/g,function(c){
           if(c==='\t')return'\\t';if(c==='\n')return'\\n';if(c==='\r')return'\\r';return'';
@@ -295,7 +311,8 @@
             conversation_history:trimHistory(),
             context:conversationContext,
             conversation_id:sessionId,
-            message_count:conversationHistory.length
+            message_count:conversationHistory.length,
+              context_summary:buildContextSummary()
           }),
           signal:controller.signal
         });
