@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>IAbot - Dashboard Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.header{background:linear-gradient(135deg,#1e293b,#334155);padding:20px 30px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #f97316}
+.header h1{font-size:24px;color:#f97316}
+.header .logo{font-weight:800;font-size:28px;color:#fff}
+.header .logo span{color:#f97316}
+.controls{padding:20px 30px;display:flex;gap:15px;flex-wrap:wrap;align-items:center}
+.controls select,.controls input{background:#1e293b;border:1px solid #475569;color:#e2e8f0;padding:10px 15px;border-radius:8px;font-size:14px}
+.controls select:focus,.controls input:focus{outline:none;border-color:#f97316}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;padding:0 30px 20px}
+.stat-card{background:linear-gradient(135deg,#1e293b,#334155);border-radius:12px;padding:25px;border-left:4px solid #f97316;transition:transform .2s}
+.stat-card:hover{transform:translateY(-3px)}
+.stat-card .label{font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
+.stat-card .value{font-size:36px;font-weight:800;color:#f97316;margin:8px 0}
+.stat-card .sub{font-size:12px;color:#64748b}
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0 30px 30px}
+.chart-card{background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155}
+.chart-card h3{color:#f97316;margin-bottom:15px;font-size:16px}
+.chart-card canvas{max-height:300px}
+.questions-section{padding:0 30px 30px}
+.questions-card{background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155}
+.questions-card h3{color:#f97316;margin-bottom:15px}
+.question-item{background:#0f172a;padding:12px 16px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.question-item .q{color:#e2e8f0}
+.question-item .count{background:#f97316;color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.loading{text-align:center;padding:60px;color:#94a3b8;font-size:18px}
+.error{background:#7f1d1d;color:#fca5a5;padding:15px;border-radius:8px;margin:20px 30px}
+.argument{background:linear-gradient(135deg,#1e293b,#0f172a);border:2px solid #f97316;border-radius:12px;padding:20px;margin:0 30px 20px;text-align:center}
+.argument .big{font-size:28px;font-weight:800;color:#f97316}
+.argument .desc{color:#94a3b8;margin-top:5px}
+@media(max-width:768px){.charts{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+<div class="logo">IA<span>bot</span></div>
+<h1>Dashboard Analytics</h1>
+</div>
+<div class="controls">
+<select id="restoSelect"><option value="">Tous les restaurants</option></select>
+<input type="date" id="dateFrom">
+<input type="date" id="dateTo">
+<button onclick="loadData()" style="background:#f97316;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700">Actualiser</button>
+</div>
+<div id="argument" class="argument" style="display:none">
+<div class="big" id="argText"></div>
+<div class="desc">Argument de vente pour la prospection</div>
+</div>
+<div class="stats" id="statsGrid">
+<div class="stat-card"><div class="label">Conversations</div><div class="value" id="totalConv">-</div><div class="sub">ce mois</div></div>
+<div class="stat-card"><div class="label">Messages</div><div class="value" id="totalMsg">-</div><div class="sub">ce mois</div></div>
+<div class="stat-card"><div class="label">Reservations</div><div class="value" id="totalRes">-</div><div class="sub">ce mois</div></div>
+<div class="stat-card"><div class="label">Taux conversion</div><div class="value" id="convRate">-</div><div class="sub">reservations / conversations</div></div>
+</div>
+<div class="charts">
+<div class="chart-card"><h3>Conversations par jour</h3><canvas id="chartConv"></canvas></div>
+<div class="chart-card"><h3>Messages par jour</h3><canvas id="chartMsg"></canvas></div>
+<div class="chart-card"><h3>Reservations par jour</h3><canvas id="chartRes"></canvas></div>
+<div class="chart-card"><h3>Top restaurants</h3><canvas id="chartTop"></canvas></div>
+</div>
+<div class="questions-section">
+<div class="questions-card"><h3>Questions les plus frequentes</h3><div id="questionsList"></div></div>
+</div>
+<script>
+const AIRTABLE_BASE='appuCnzeiV1MZKAdt';
+const AIRTABLE_TABLE='tblVbfsR37yBLgv5i';
+const AIRTABLE_ANALYTICS='tblVbfsR37yBLgv5i';
+const TOKEN=new URLSearchParams(location.search).get('token')||'';
+let allRecords=[];
+let chartInstances={};
+async function fetchAirtable(table,params=''){
+  const url='https://api.airtable.com/v0/'+AIRTABLE_BASE+'/'+table+'?'+params;
+  const r=await fetch(url,{headers:{'Authorization':'Bearer '+TOKEN}});
+  if(!r.ok)throw new Error('Erreur API: '+r.status);
+  return r.json();
+}
+async function loadRestaurants(){
+  try{
+    const data=await fetchAirtable('Restaurants','fields%5B%5D=resto_id');
+    const sel=document.getElementById('restoSelect');
+    data.records.forEach(r=>{
+      if(r.fields.resto_id){
+        const o=document.createElement('option');
+        o.value=r.fields.resto_id;
+        o.textContent=r.fields.resto_id;
+        sel.appendChild(o);
+      }
+    });
+  }catch(e){console.error(e)}
+}
+async function loadData(){
+  try{
+    let params='';
+    const resto=document.getElementById('restoSelect').value;
+    const from=document.getElementById('dateFrom').value;
+    const to=document.getElementById('dateTo').value;
+    let filters=[];
+    if(resto)filters.push("resto_id='"+resto+"'");
+    if(from)filters.push("IS_AFTER({date},'"+from+"')");
+    if(to)filters.push("IS_BEFORE({date},'"+to+"')");
+    if(filters.length)params='filterByFormula=AND('+encodeURIComponent(filters.join(','))+')';
+    const data=await fetchAirtable('Analytics',params);
+    allRecords=data.records.map(r=>r.fields);
+    updateStats();
+    updateCharts();
+    updateQuestions();
+    updateArgument();
+  }catch(e){
+    console.error(e);
+    document.getElementById('statsGrid').innerHTML='<div class="error">Erreur de chargement. Verifiez le token API.</div>';
+  }
+}
+function updateStats(){
+  const conv=allRecords.reduce((s,r)=>s+(r.nb_conversations||0),0);
+  const msg=allRecords.reduce((s,r)=>s+(r.nb_messages||0),0);
+  const res=allRecords.reduce((s,r)=>s+(r.nb_reservations||0),0);
+  const rate=conv>0?((res/conv)*100).toFixed(1)+'%':'0%';
+  document.getElementById('totalConv').textContent=conv;
+  document.getElementById('totalMsg').textContent=msg;
+  document.getElementById('totalRes').textContent=res;
+  document.getElementById('convRate').textContent=rate;
+}
+function updateCharts(){
+  const byDate={};
+  allRecords.forEach(r=>{
+    const d=r.date||'inconnu';
+    if(!byDate[d])byDate[d]={conv:0,msg:0,res:0};
+    byDate[d].conv+=(r.nb_conversations||0);
+    byDate[d].msg+=(r.nb_messages||0);
+    byDate[d].res+=(r.nb_reservations||0);
+  });
+  const dates=Object.keys(byDate).sort();
+  const convData=dates.map(d=>byDate[d].conv);
+  const msgData=dates.map(d=>byDate[d].msg);
+  const resData=dates.map(d=>byDate[d].res);
+  const cfg={type:'line',options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'},grid:{color:'#1e293b'}},y:{ticks:{color:'#94a3b8'},grid:{color:'#334155'}}}}};
+  if(chartInstances.conv)chartInstances.conv.destroy();
+  if(chartInstances.msg)chartInstances.msg.destroy();
+  if(chartInstances.res)chartInstances.res.destroy();
+  if(chartInstances.top)chartInstances.top.destroy();
+  chartInstances.conv=new Chart(document.getElementById('chartConv'),{...cfg,data:{labels:dates,datasets:[{data:convData,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.1)',fill:true,tension:0.3}]}});
+  chartInstances.msg=new Chart(document.getElementById('chartMsg'),{...cfg,data:{labels:dates,datasets:[{data:msgData,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.3}]}});
+  chartInstances.res=new Chart(document.getElementById('chartRes'),{...cfg,data:{labels:dates,datasets:[{data:resData,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',fill:true,tension:0.3}]}});
+  const byResto={};
+  allRecords.forEach(r=>{
+    const id=r.resto_id||'inconnu';
+    byResto[id]=(byResto[id]||0)+(r.nb_conversations||0);
+  });
+  const sorted=Object.entries(byResto).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  chartInstances.top=new Chart(document.getElementById('chartTop'),{type:'bar',data:{labels:sorted.map(s=>s[0]),datasets:[{data:sorted.map(s=>s[1]),backgroundColor:'#f97316',borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'},grid:{color:'#334155'}},y:{ticks:{color:'#94a3b8'},grid:{display:false}}}}});
+}
+function updateQuestions(){
+  const qMap={};
+  allRecords.forEach(r=>{
+    if(r.questions_frequentes){
+      r.questions_frequentes.split('\n').forEach(q=>{
+        q=q.trim();
+        if(q)qMap[q]=(qMap[q]||0)+1;
+      });
+    }
+  });
+  const sorted=Object.entries(qMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const el=document.getElementById('questionsList');
+  if(sorted.length===0){el.innerHTML='<div style="color:#64748b;padding:20px;text-align:center">Aucune question enregistree</div>';return;}
+  el.innerHTML=sorted.map(([q,c])=>'<div class="question-item"><span class="q">'+q+'</span><span class="count">'+c+'</span></div>').join('');
+}
+function updateArgument(){
+  const conv=allRecords.reduce((s,r)=>s+(r.nb_conversations||0),0);
+  const res=allRecords.reduce((s,r)=>s+(r.nb_reservations||0),0);
+  const el=document.getElementById('argument');
+  const txt=document.getElementById('argText');
+  if(conv>0){
+    el.style.display='block';
+    txt.textContent=conv+' conversations, '+res+' reservations ce mois-ci';
+  }else{el.style.display='none';}
+}
+loadRestaurants();
+if(TOKEN)loadData();
+else document.getElementById('statsGrid').innerHTML='<div class="error">Ajoutez ?token=VOTRE_TOKEN_AIRTABLE dans l\'URL pour charger les donnees.</div>';
+</script>
+</body>
+</html>
