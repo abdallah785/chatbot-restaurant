@@ -1,419 +1,609 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assistant IA Restaurant</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    :root{
-      --primary:#FF6B00;
-      --secondary:#FFD700;
-      --bg:#0a0a0a;
-      --chat-bg:#111111;
-      --user-bubble:var(--primary);
-      --bot-bubble:#1a1a1a;
-      --text:rgba(255,255,255,0.9);
-      --text-muted:rgba(255,255,255,0.5);
-      --viewport-height:100vh;
-    }
-    body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg);height:var(--viewport-height);display:flex;flex-direction:column;overflow:hidden;color:var(--text)}
-    .header{background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 70%,#000));color:#fff;padding:0 16px;height:70px;display:flex;align-items:center;gap:12px;position:relative;z-index:10;flex-shrink:0}
-    .header-avatar{width:44px;height:44px;background:var(--secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;flex-shrink:0}
-    .header-info{flex:1;min-width:0}
-    .header-info h1{font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .header-sub{display:flex;align-items:center;gap:6px;font-size:12px;opacity:0.85;margin-top:2px}
-    .pulse-dot{width:7px;height:7px;background:#4caf50;border-radius:50%;animation:pulse 2s infinite}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-    .info-toggle{background:rgba(255,255,255,0.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;flex-shrink:0}
-    .info-toggle:hover{background:rgba(255,255,255,0.25)}
-    .info-panel{background:#111;max-height:0;overflow:hidden;transition:max-height 0.35s ease,padding 0.35s ease;padding:0 16px;flex-shrink:0}
-    .info-panel.open{max-height:300px;padding:16px}
-    .info-panel p{font-size:13px;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
-    .info-panel p span{color:var(--text)}
-    .info-actions{display:flex;gap:8px;margin-top:12px}
-    .info-actions a{flex:1;text-align:center;padding:10px;border-radius:12px;font-size:13px;font-weight:500;text-decoration:none;transition:opacity 0.2s}
-    .info-actions .call-btn{background:var(--primary);color:#fff}
-    .info-actions .map-btn{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.1)}
-    .context-banner{display:none;background:rgba(255,255,255,0.04);padding:8px 16px;font-size:12px;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0}
-    .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
-    .msg-group{display:flex;flex-direction:column;gap:4px}
-    .msg-row{display:flex;align-items:flex-end;gap:8px}
-    .msg-row.user{flex-direction:row-reverse}
-    .bot-avatar-sm{width:28px;height:28px;background:var(--secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;flex-shrink:0}
-    .msg{max-width:80%;padding:12px 16px;font-size:14px;line-height:1.55;animation:msgIn 0.3s ease}
-    @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-    .msg.bot{background:var(--bot-bubble);color:var(--text);border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,0.06)}
-    .msg.user{background:var(--user-bubble);color:#fff;border-radius:18px 18px 4px 18px}
-    .msg-time{font-size:10px;color:var(--text-muted);margin-top:3px;padding:0 4px}
-    .msg-row.user .msg-time{text-align:right}
-    .typing-indicator{display:none;align-self:flex-start;padding:14px 20px;background:var(--bot-bubble);border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,0.06);gap:5px}
-    .typing-indicator span{width:7px;height:7px;background:rgba(255,255,255,0.4);border-radius:50%;animation:bounce 0.6s infinite alternate}
-    .typing-indicator span:nth-child(2){animation-delay:0.2s}
-    .typing-indicator span:nth-child(3){animation-delay:0.4s}
-    @keyframes bounce{to{transform:translateY(-6px);opacity:0.2}}
-    .quick-btns{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px;flex-shrink:0}
-    .quick-btn{background:transparent;border:1px solid color-mix(in srgb,var(--secondary) 25%,transparent);color:var(--secondary);padding:9px 16px;border-radius:20px;font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all 0.2s;white-space:nowrap}
-    .quick-btn:hover{background:color-mix(in srgb,var(--secondary) 10%,transparent);transform:scale(1.02)}
-    .input-area{display:flex;gap:8px;padding:12px 16px;background:var(--bg);border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0}
-    .input-area input{flex:1;background:#161616;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:13px 18px;font-size:14px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;transition:border 0.2s}
-    .input-area input:focus{border-color:var(--primary)}
-    .input-area input::placeholder{color:var(--text-muted)}
-    .send-btn{width:44px;height:44px;border-radius:50%;border:none;background:#333;color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
-    .send-btn.active{background:var(--secondary);color:#000}
-    .send-btn:active{transform:scale(0.9)}
-    .footer{text-align:center;padding:6px;font-size:10px;color:var(--text-muted);flex-shrink:0}
-    .skeleton{display:flex;flex-direction:column;gap:16px;padding:16px;flex:1}
-    .skeleton-line{height:14px;background:rgba(255,255,255,0.05);border-radius:8px;animation:shimmer 1.5s infinite}
-    @keyframes shimmer{0%{opacity:0.3}50%{opacity:0.6}100%{opacity:0.3}}
-    .skeleton-line:nth-child(1){width:65%}
-    .skeleton-line:nth-child(2){width:80%}
-    .skeleton-line:nth-child(3){width:45%}
-    .error-msg{background:rgba(255,60,60,0.1);color:#ff6b6b;border:1px solid rgba(255,60,60,0.2);padding:12px 16px;border-radius:14px;font-size:13px;text-align:center;align-self:center}
-    .hidden{display:none!important}
-    @media(max-width:480px){
-      .msg{max-width:88%;font-size:13px}
-      .header{height:60px;padding:0 12px}
-      .header-info h1{font-size:16px}
-      .header-avatar{width:38px;height:38px;font-size:16px}
-      .quick-btn{font-size:12px;padding:7px 12px}
-    }
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#FF6B00;--secondary:#FFD700;--bg:#0a0a0a;--chat-bg:#111111;
+            --user-bubble:var(--primary);--bot-bubble:#1a1a1a;
+            --text:rgba(255,255,255,0.9);--text-muted:rgba(255,255,255,0.5);
+            --viewport-height:100vh;
+        }
+        body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg);height:var(--viewport-height);display:flex;flex-direction:column;overflow:hidden;color:var(--text)}
+        .header{background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 70%,#000));color:#fff;padding:0 16px;height:70px;display:flex;align-items:center;gap:12px;position:relative;z-index:10;flex-shrink:0}
+        .header-avatar{width:44px;height:44px;background:var(--secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;flex-shrink:0}
+        .header-info{flex:1;min-width:0}
+        .header-info h1{font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .header-sub{display:flex;align-items:center;gap:6px;font-size:12px;opacity:0.85;margin-top:2px}
+        .pulse-dot{width:7px;height:7px;background:#4caf50;border-radius:50%;animation:pulse 2s infinite}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+        .info-toggle{background:rgba(255,255,255,0.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;flex-shrink:0}
+        .info-toggle:hover{background:rgba(255,255,255,0.25)}
+        .info-panel{background:#111;max-height:0;overflow:hidden;transition:max-height 0.35s ease,padding 0.35s ease;padding:0 16px;flex-shrink:0}
+        .info-panel.open{max-height:300px;padding:16px}
+        .info-panel p{font-size:13px;color:var(--text-muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+        .info-panel p span{color:var(--text)}
+        .info-actions{display:flex;gap:8px;margin-top:12px}
+        .info-actions a{flex:1;text-align:center;padding:10px;border-radius:12px;font-size:13px;font-weight:500;text-decoration:none;transition:opacity 0.2s}
+        .info-actions .call-btn{background:var(--primary);color:#fff}
+        .info-actions .map-btn{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.1)}
+        .context-banner{display:none;background:rgba(255,255,255,0.04);padding:8px 16px;font-size:12px;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0}
+        .order-banner{display:none;background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 80%,#000));padding:12px 16px;font-size:14px;color:#fff;font-weight:500;text-align:center;flex-shrink:0;animation:slideDown 0.3s ease}
+        @keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+        .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+        .msg-group{display:flex;flex-direction:column;gap:4px}
+        .msg-row{display:flex;align-items:flex-end;gap:8px}
+        .msg-row.user{flex-direction:row-reverse}
+        .bot-avatar-sm{width:28px;height:28px;background:var(--secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;flex-shrink:0}
+        .msg{max-width:80%;padding:12px 16px;font-size:14px;line-height:1.55;animation:msgIn 0.3s ease}
+        @keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+        .msg.bot{background:var(--bot-bubble);color:var(--text);border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,0.06)}
+        .msg.user{background:var(--user-bubble);color:#fff;border-radius:18px 18px 4px 18px}
+        .msg-time{font-size:10px;color:var(--text-muted);margin-top:3px;padding:0 4px}
+        .msg-row.user .msg-time{text-align:right}
+        .msg.order-recap{background:color-mix(in srgb,var(--secondary) 10%,var(--bot-bubble));border:1px solid color-mix(in srgb,var(--secondary) 25%,transparent)}
+        .order-recap-card{padding:4px 0}
+        .order-recap-card .order-item{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,0.05)}
+        .order-recap-card .order-item:last-child{border-bottom:none}
+        .order-recap-card .order-mod{font-size:11px;color:var(--text-muted);padding-left:12px}
+        .order-recap-card .order-total{display:flex;justify-content:space-between;padding:8px 0 4px;font-weight:700;font-size:15px;border-top:2px solid rgba(255,255,255,0.1);margin-top:4px}
+        .order-recap-card .order-service{font-size:12px;color:var(--text-muted);margin-top:4px}
+        .order-status-msg{background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 15%,var(--bot-bubble)),var(--bot-bubble));border:1px solid color-mix(in srgb,var(--primary) 30%,transparent);text-align:center;padding:16px}
+        .order-status-msg .order-num{font-size:20px;font-weight:700;color:var(--secondary)}
+        .typing-indicator{display:none;align-self:flex-start;padding:14px 20px;background:var(--bot-bubble);border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,0.06);gap:5px}
+        .typing-indicator span{width:7px;height:7px;background:rgba(255,255,255,0.4);border-radius:50%;animation:bounce 0.6s infinite alternate}
+        .typing-indicator span:nth-child(2){animation-delay:0.2s}
+        .typing-indicator span:nth-child(3){animation-delay:0.4s}
+        @keyframes bounce{to{transform:translateY(-6px);opacity:0.2}}
+        .quick-btns{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px;flex-shrink:0}
+        .quick-btn{background:transparent;border:1px solid color-mix(in srgb,var(--secondary) 25%,transparent);color:var(--secondary);padding:9px 16px;border-radius:20px;font-size:13px;font-family:'Outfit',sans-serif;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+        .quick-btn:hover{background:color-mix(in srgb,var(--secondary) 10%,transparent);transform:scale(1.02)}
+        .quick-btn.order-btn{border-color:color-mix(in srgb,var(--primary) 40%,transparent);color:var(--primary);font-weight:600}
+        .quick-btn.order-btn:hover{background:color-mix(in srgb,var(--primary) 10%,transparent)}
+        .input-area{display:flex;gap:8px;padding:12px 16px;background:var(--bg);border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+        .input-area input{flex:1;background:#161616;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:13px 18px;font-size:14px;color:var(--text);outline:none;font-family:'Outfit',sans-serif;transition:border 0.2s}
+        .input-area input:focus{border-color:var(--primary)}
+        .input-area input::placeholder{color:var(--text-muted)}
+        .send-btn{width:44px;height:44px;border-radius:50%;border:none;background:#333;color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+        .send-btn.active{background:var(--secondary);color:#000}
+        .send-btn:active{transform:scale(0.9)}
+        .footer{text-align:center;padding:6px;font-size:10px;color:var(--text-muted);flex-shrink:0}
+        .skeleton{display:flex;flex-direction:column;gap:16px;padding:16px;flex:1}
+        .skeleton-line{height:14px;background:rgba(255,255,255,0.05);border-radius:8px;animation:shimmer 1.5s infinite}
+        @keyframes shimmer{0%{opacity:0.3}50%{opacity:0.6}100%{opacity:0.3}}
+        .skeleton-line:nth-child(1){width:65%}.skeleton-line:nth-child(2){width:80%}.skeleton-line:nth-child(3){width:45%}
+        .error-msg{background:rgba(255,60,60,0.1);color:#ff6b6b;border:1px solid rgba(255,60,60,0.2);padding:12px 16px;border-radius:14px;font-size:13px;text-align:center;align-self:center}
+        .hidden{display:none!important}
+        @media(max-width:480px){
+            .msg{max-width:88%;font-size:13px}
+            .header{height:60px;padding:0 12px}
+            .header-info h1{font-size:16px}
+            .header-avatar{width:38px;height:38px;font-size:16px}
+            .quick-btn{font-size:12px;padding:7px 12px}
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="header" id="header">
-      <div class="header-avatar" id="headerAvatar">...</div>
-      <div class="header-info">
-        <h1 id="restoName">Chargement...</h1>
-        <div class="header-sub"><span class="pulse-dot"></span> Assistant IA &bull; En ligne 24/7</div>
-      </div>
-      <button class="info-toggle" onclick="toggleInfo()" id="infoBtn">&#8505;&#65039;</button>
+        <div class="header-avatar" id="headerAvatar">...</div>
+        <div class="header-info">
+            <h1 id="restoName">Chargement...</h1>
+            <div class="header-sub"><span class="pulse-dot"></span> Assistant IA &bull; En ligne 24/7</div>
+        </div>
+        <button class="info-toggle" onclick="toggleInfo()" id="infoBtn">&#8505;&#65039;</button>
     </div>
     <div class="info-panel" id="infoPanel">
-      <p>&#128205; <span id="infoAddr">-</span></p>
-    <p>&#128336; <span id="infoHours">-</span></p>
-    <p>&#128222; <span id="infoPhone">-</span></p>
-    <p>&#129385; <span id="infoHalal">Halal certifi&eacute;</span></p>
-    <div class="info-actions">
-    <a href="#" class="call-btn" id="callBtn">&#128222; Appeler</a>
-    <a href="#" class="map-btn" id="mapBtn" target="_blank">&#128205; Itin&eacute;raire</a>
+        <p>&#128205; <span id="infoAddr">-</span></p>
+        <p>&#128336; <span id="infoHours">-</span></p>
+        <p>&#128222; <span id="infoPhone">-</span></p>
+        <p>&#129385; <span id="infoHalal">Halal certifi&eacute;</span></p>
+        <div class="info-actions">
+            <a href="#" class="call-btn" id="callBtn">&#128222; Appeler</a>
+            <a href="#" class="map-btn" id="mapBtn" target="_blank">&#128205; Itin&eacute;raire</a>
+        </div>
     </div>
+    <div class="context-banner" id="contextBanner"></div>
+    <div class="order-banner" id="orderBanner"></div>
+    <div class="chat-area" id="chatArea">
+        <div class="skeleton" id="skeleton">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+        </div>
     </div>
-  <div class="context-banner" id="contextBanner"></div>
-  <div class="chat-area" id="chatArea">
-  <div class="skeleton" id="skeleton">
-  <div class="skeleton-line"></div>
-  <div class="skeleton-line"></div>
-  <div class="skeleton-line"></div>
-  </div>
-  </div>
-  <div class="typing-indicator" id="typing"><span></span><span></span><span></span></div>
-  <div class="quick-btns" id="quickBtns"></div>
-  <div class="input-area">
-  <input type="text" id="userInput" placeholder="Posez votre question..." autocomplete="off">
-  <button class="send-btn" id="sendBtn" onclick="sendMessage()">&#8593;</button>
-  </div>
-  <div class="footer">Propuls&eacute; par IAbot</div>
-  
-  <script>
-    const WEBHOOK_URL='https://hook.eu1.make.com/4loqm3jex6phgi9g2grs7udk7dkibylm';
-    const params=new URLSearchParams(window.location.search);
-    const restoId=params.get('resto')||'';
-    let restoData=null;
-    let conversationHistory=[];
-    let sessionId='s_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
-    let userInteracted=false;
-    let quickBtnsVisible=true;
+    <div class="typing-indicator" id="typing"><span></span><span></span><span></span></div>
+    <div class="quick-btns" id="quickBtns"></div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Posez votre question..." autocomplete="off">
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">&#8593;</button>
+    </div>
+    <div class="footer">Propuls&eacute; par IAbot</div>    <script>
+        const WEBHOOK_URL='https://hook.eu1.make.com/4loqm3jex6phgi9g2grs7udk7dkibylm';
+        const params=new URLSearchParams(window.location.search);
+        const restoId=params.get('resto')||'';
+        const STORAGE_KEY='iabot_session_'+restoId;
+        let restoData=null;
+        let conversationHistory=[];
+        let sessionId='s_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
+        let userInteracted=false;
+        let quickBtnsVisible=true;
+        let currentOrder=null;
+        let confirmedOrder=null;
+        let conversationContext={
+            resto_id:restoId,customer_name:null,customer_party_size:null,
+            customer_date:null,customer_time:null,customer_allergies:[],
+            customer_preferences:[],items_discussed:[],items_interested:[],
+            reservation_in_progress:false,reservation_complete:false,
+            conversation_mood:'neutral',visit_type:null,
+            has_children:false,is_group:false,
+            conversation_stage:'greeting',questions_asked:[],
+            conversation_id:'',message_count:0
+        };
+        conversationContext.conversation_id=sessionId;
 
-    let conversationContext={
-      resto_id:restoId,customer_name:null,customer_party_size:null,
-      customer_date:null,customer_time:null,customer_allergies:[],
-      customer_preferences:[],items_discussed:[],items_interested:[],
-      reservation_in_progress:false,reservation_complete:false,
-      conversation_mood:'neutral',visit_type:null,
-      has_children:false,is_group:false,
-      conversation_stage:'greeting',questions_asked:[]
-    };
-
-    function getTimeStr(){
-      const d=new Date();
-      return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
-    }
-
-    function addMessage(text,type){
-      const area=document.getElementById('chatArea');
-      const row=document.createElement('div');
-      row.className='msg-row '+type;
-      let html='';
-      if(type==='bot'){
-        const letter=restoData?restoData.nom.charAt(0).toUpperCase():'?';
-        html+='<div class="bot-avatar-sm">'+letter+'</div>';
-      }
-      html+='<div><div class="msg '+type+'">'+escapeHtml(text)+'</div><div class="msg-time">'+getTimeStr()+'</div></div>';
-      row.innerHTML=html;
-      area.appendChild(row);
-      area.scrollTop=area.scrollHeight;
-    }
-
-    function escapeHtml(t){
-      const d=document.createElement('div');d.textContent=t;return d.innerHTML;
-    }
-
-    function showTyping(show){
-      const el=document.getElementById('typing');
-      el.style.display=show?'flex':'none';
-      const area=document.getElementById('chatArea');
-      area.scrollTop=area.scrollHeight;
-    }
-
-    function showError(msg){
-      const area=document.getElementById('chatArea');
-      const div=document.createElement('div');
-      div.className='error-msg';div.textContent=msg;
-      area.appendChild(div);area.scrollTop=area.scrollHeight;
-    }
-
-    function setTheme(main,second){
-      document.documentElement.style.setProperty('--primary',main||'#FF6B00');
-      document.documentElement.style.setProperty('--secondary',second||'#FFD700');
-    }
-
-    function playSound(){
-      if(!userInteracted)return;
-      try{
-        const ctx=new(window.AudioContext||window.webkitAudioContext)();
-        const osc=ctx.createOscillator();const gain=ctx.createGain();
-        osc.connect(gain);gain.connect(ctx.destination);
-        osc.frequency.value=800;osc.type='sine';
-        gain.gain.setValueAtTime(0.08,ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.25);
-        osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.25);
-      }catch(e){}
-    }
-
-    function getQuickButtons(typeCuisine){
-      const t=(typeCuisine||'').toLowerCase();
-      if(t.includes('burger')||t.includes('kebab')||t.includes('tacos')||t.includes('fast'))
-        return['Voir les menus \ud83c\udf54','C\'est halal ?','Horaires','Commander'];
-      if(t.includes('pizza'))
-        return['Voir les pizzas \ud83c\udf55','C\'est halal ?','Horaires','Commander'];
-      if(t.includes('marocain')||t.includes('liban')||t.includes('turc')||t.includes('indien')||t.includes('oriental'))
-        return['Voir la carte \ud83c\udf7d\ufe0f','C\'est halal ?','R\u00e9server','Suggestions'];
-      return['Voir le menu \ud83d\udccb','C\'est halal ?','Horaires','R\u00e9server'];
-    }
-
-    function renderQuickBtns(typeCuisine){
-      const c=document.getElementById('quickBtns');c.innerHTML='';
-      const btns=getQuickButtons(typeCuisine);
-      btns.forEach(function(q){
-        const b=document.createElement('button');b.className='quick-btn';b.textContent=q;
-        b.onclick=function(){document.getElementById('userInput').value=q;sendMessage();};
-        c.appendChild(b);
-      });
-    }
-
-    function toggleInfo(){
-      document.getElementById('infoPanel').classList.toggle('open');
-    }
-
-    function extractContext(msg){
-      const m=msg.toLowerCase();
-      var nameMatch=m.match(/(?:m'appelle|je suis|mon nom|c'est pour)\s+(\w+)/i);
-      if(nameMatch)conversationContext.customer_name=nameMatch[1].charAt(0).toUpperCase()+nameMatch[1].slice(1);
-      var partyMatch=m.match(/(\d+)\s*(?:personnes|pers|couverts|on sera|on est)/);
-      if(partyMatch){conversationContext.customer_party_size=parseInt(partyMatch[1]);if(parseInt(partyMatch[1])>4)conversationContext.is_group=true;}
-      if(m.includes('enfant')||m.includes('gamin')||m.includes('petit'))conversationContext.has_children=true;
-      var allergyWords=['allergi','intoleran','sans gluten','sans lactose','vegetarien','vegan','noix','arachide'];
-      allergyWords.forEach(function(w){if(m.includes(w)&&conversationContext.customer_allergies.indexOf(w)<0)conversationContext.customer_allergies.push(w);});
-      if(m.includes('press')||m.includes('rapide')||m.includes('vite'))conversationContext.conversation_mood='rushed';
-      else if(m.includes('faim')||m.includes('affam')||m.includes('dalle'))conversationContext.conversation_mood='hungry';
-      else if(m.includes('hesite')||m.includes('sais pas'))conversationContext.conversation_mood='hesitant';
-      if(m.includes('sur place')||m.includes('table'))conversationContext.visit_type='sur_place';
-      else if(m.includes('emporter')||m.includes('take'))conversationContext.visit_type='emporter';
-      else if(m.includes('livr'))conversationContext.visit_type='livraison';
-      if(m.includes('reser'))conversationContext.reservation_in_progress=true;
-      var len=conversationHistory.length;
-      if(len<=2)conversationContext.conversation_stage='greeting';
-      else if(len<=6)conversationContext.conversation_stage='exploring';
-      else if(len<=10)conversationContext.conversation_stage='deciding';
-      else conversationContext.conversation_stage='closing';
-    }
-
-    function updateContextBanner(){
-      var b=document.getElementById('contextBanner');var parts=[];
-      if(conversationContext.customer_name)parts.push('\ud83d\udc64 '+conversationContext.customer_name);
-      if(conversationContext.customer_party_size)parts.push(conversationContext.customer_party_size+' pers.');
-      if(conversationContext.customer_date)parts.push(conversationContext.customer_date);
-      if(conversationContext.customer_time)parts.push(conversationContext.customer_time);
-      if(conversationContext.customer_allergies.length)parts.push('\u26a0\ufe0f '+conversationContext.customer_allergies.join(', '));
-      if(parts.length>0){b.textContent=parts.join(' \u2022 ');b.style.display='block';}
-      else{b.style.display='none';}
-    }
-
-    function buildContextSummary(){
-        var parts=[];
-        if(conversationContext.customer_name)parts.push('Nom: '+conversationContext.customer_name);
-        if(conversationContext.customer_party_size)parts.push('Personnes: '+conversationContext.customer_party_size);
-        if(conversationContext.customer_date)parts.push('Date: '+conversationContext.customer_date);
-        if(conversationContext.customer_time)parts.push('Heure: '+conversationContext.customer_time);
-        if(conversationContext.customer_allergies.length)parts.push('Allergies: '+conversationContext.customer_allergies.join(', '));
-        if(conversationContext.visit_type)parts.push('Type: '+conversationContext.visit_type);
-        if(conversationContext.has_children)parts.push('Enfants: oui');
-        if(conversationContext.is_group)parts.push('Groupe: oui');
-        if(conversationContext.conversation_mood!=='neutral')parts.push('Mood: '+conversationContext.conversation_mood);
-        if(conversationContext.reservation_in_progress)parts.push('Reservation: en cours');
-        parts.push('Stage: '+conversationContext.conversation_stage);
-        parts.push('Messages: '+conversationHistory.length);
-        return parts.join(' | ');
-      }
-      function safeParseJSON(text){
-      try{return JSON.parse(text);}catch(e){
-        var cleaned=text.replace(/[\x00-\x1f\x7f]/g,function(c){
-          if(c==='\t')return'\\t';if(c==='\n')return'\\n';if(c==='\r')return'\\r';return'';
+        function saveSession(){
+            try{
+                const session={
+                    conversationHistory:conversationHistory,
+                    conversationContext:conversationContext,
+                    currentOrder:currentOrder,
+                    confirmedOrder:confirmedOrder,
+                    restoData:restoData,
+                    sessionId:sessionId,
+                    timestamp:Date.now()
+                };
+                localStorage.setItem(STORAGE_KEY,JSON.stringify(session));
+            }catch(e){}
+        }
+        function restoreSession(){
+            try{
+                const saved=localStorage.getItem(STORAGE_KEY);
+                if(!saved)return false;
+                const session=JSON.parse(saved);
+                const hasConfirmed=session.confirmedOrder!==null;
+                const maxAge=hasConfirmed?4*60*60*1000:30*60*1000;
+                if(Date.now()-session.timestamp>maxAge){
+                    localStorage.removeItem(STORAGE_KEY);
+                    return false;
+                }
+                conversationHistory=session.conversationHistory||[];
+                conversationContext=session.conversationContext||conversationContext;
+                currentOrder=session.currentOrder||null;
+                confirmedOrder=session.confirmedOrder||null;
+                restoData=session.restoData||null;
+                if(session.sessionId)sessionId=session.sessionId;
+                return true;
+            }catch(e){
+                localStorage.removeItem(STORAGE_KEY);
+                return false;
+            }
+        }
+        function clearSession(){
+            localStorage.removeItem(STORAGE_KEY);
+            currentOrder=null;
+            confirmedOrder=null;
+        }
+        function getTimeStr(){
+            const d=new Date();
+            return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+        }
+        function escapeHtml(t){
+            const d=document.createElement('div');d.textContent=t;return d.innerHTML;
+        }
+        function addMessage(text,type,extraClass){
+            const area=document.getElementById('chatArea');
+            const row=document.createElement('div');
+            row.className='msg-row '+type;
+            let cls='msg '+type;
+            if(extraClass)cls+=' '+extraClass;
+            let html='';
+            if(type==='bot'){
+                const letter=restoData?restoData.nom.charAt(0).toUpperCase():'?';
+                html+='<div class="bot-avatar-sm">'+letter+'</div>';
+            }
+            html+='<div><div class="'+cls+'">'+escapeHtml(text)+'</div><div class="msg-time">'+getTimeStr()+'</div></div>';
+            row.innerHTML=html;
+            area.appendChild(row);
+            area.scrollTop=area.scrollHeight;
+        }
+        function addHtmlMessage(htmlContent,type,extraClass){
+            const area=document.getElementById('chatArea');
+            const row=document.createElement('div');
+            row.className='msg-row '+type;
+            let cls='msg '+type;
+            if(extraClass)cls+=' '+extraClass;
+            let content='';
+            if(type==='bot'){
+                const letter=restoData?restoData.nom.charAt(0).toUpperCase():'?';
+                content+='<div class="bot-avatar-sm">'+letter+'</div>';
+            }
+            content+='<div><div class="'+cls+'">'+htmlContent+'</div><div class="msg-time">'+getTimeStr()+'</div></div>';
+            row.innerHTML=content;
+            area.appendChild(row);
+            area.scrollTop=area.scrollHeight;
+        }
+        function showTyping(show){
+            const el=document.getElementById('typing');
+            el.style.display=show?'flex':'none';
+            document.getElementById('chatArea').scrollTop=document.getElementById('chatArea').scrollHeight;
+        }
+        function showError(msg){
+            const area=document.getElementById('chatArea');
+            const div=document.createElement('div');
+            div.className='error-msg';div.textContent=msg;
+            area.appendChild(div);area.scrollTop=area.scrollHeight;
+        }
+        function setTheme(main,second){
+            document.documentElement.style.setProperty('--primary',main||'#FF6B00');
+            document.documentElement.style.setProperty('--secondary',second||'#FFD700');
+        }
+        function playSound(){
+            if(!userInteracted)return;
+            try{
+                const ctx=new(window.AudioContext||window.webkitAudioContext)();
+                const osc=ctx.createOscillator();const gain=ctx.createGain();
+                osc.connect(gain);gain.connect(ctx.destination);
+                osc.frequency.value=800;osc.type='sine';
+                gain.gain.setValueAtTime(0.08,ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.25);
+                osc.start(ctx.currentTime);osc.stop(ctx.currentTime+0.25);
+            }catch(e){}
+        }
+        function displayOrderRecap(orderData){
+            if(!orderData||!orderData.plats)return;
+            let h='<div class="order-recap-card">';
+            h+='<div style="font-weight:600;margin-bottom:8px">\ud83d\udccb R\u00e9cap de votre commande :</div>';
+            orderData.plats.forEach(function(p){
+                const qty=p.quantite||1;
+                const prix=(p.prix*qty).toFixed(2);
+                h+='<div class="order-item"><span>'+qty+'x '+escapeHtml(p.nom)+'</span><span>'+prix+'\u20ac</span></div>';
+                if(p.modifications){
+                    h+='<div class="order-mod">\u2192 '+escapeHtml(p.modifications)+'</div>';
+                }
+            });
+            h+='<div class="order-total"><span>Total</span><span>'+orderData.total.toFixed(2)+'\u20ac</span></div>';
+            if(orderData.type_service){
+                const svc=orderData.type_service==='sur_place'?'\ud83c\udfbd Sur place':'\ud83d\udce6 \u00c0 emporter';
+                h+='<div class="order-service">'+svc+'</div>';
+            }
+            h+='</div>';
+            addHtmlMessage(h,'bot','order-recap');
+            currentOrder=orderData;
+            saveSession();
+        }
+        function showOrderBanner(numero,temps){
+            const banner=document.getElementById('orderBanner');
+            banner.innerHTML='\ud83c\udf54 Commande #'+numero+' \u2014 En cours \u2014 ~'+temps;
+            banner.style.display='block';
+        }
+        function hideOrderBanner(){
+            document.getElementById('orderBanner').style.display='none';
+        }
+        function showOrderConfirmation(numero,temps){
+            let h='<div class="order-status-msg">';
+            h+='<div>\u2705 Commande envoy\u00e9e !</div>';
+            h+='<div class="order-num">#'+numero+'</div>';
+            h+='<div style="margin-top:8px;font-size:13px">~'+temps+' \u2014 Rendez-vous au comptoir</div>';
+            h+='</div>';
+            addHtmlMessage(h,'bot','order-status-msg');
+            showOrderBanner(numero,temps);
+            confirmedOrder={numero:numero,temps:temps};
+            currentOrder=null;
+            saveSession();
+        }
+        function getQuickButtons(typeCuisine){
+            const t=(typeCuisine||'').toLowerCase();
+            if(t.includes('burger')||t.includes('kebab')||t.includes('tacos')||t.includes('fast'))
+                return[{text:'Voir les menus \ud83c\udf54',order:false},{text:"C'est halal ?",order:false},{text:'Horaires',order:false},{text:'Commander \ud83c\udf54',order:true}];
+            if(t.includes('pizza'))
+                return[{text:'Voir les pizzas \ud83c\udf55',order:false},{text:"C'est halal ?",order:false},{text:'Horaires',order:false},{text:'Commander \ud83c\udf54',order:true}];
+            if(t.includes('marocain')||t.includes('liban')||t.includes('turc')||t.includes('indien')||t.includes('oriental'))
+                return[{text:'Voir la carte \ud83c\udf7d\ufe0f',order:false},{text:"C'est halal ?",order:false},{text:'R\u00e9server',order:false},{text:'Commander \ud83c\udf54',order:true}];
+            return[{text:'Voir le menu \ud83d\udccb',order:false},{text:"C'est halal ?",order:false},{text:'Horaires',order:false},{text:'Commander \ud83c\udf54',order:true}];
+        }
+        function renderQuickBtns(typeCuisine){
+            const c=document.getElementById('quickBtns');c.innerHTML='';
+            const btns=getQuickButtons(typeCuisine);
+            btns.forEach(function(q){
+                const b=document.createElement('button');
+                b.className='quick-btn'+(q.order?' order-btn':'');
+                b.textContent=q.text;
+                b.onclick=function(){document.getElementById('userInput').value=q.text;sendMessage();};
+                c.appendChild(b);
+            });
+        }
+        function toggleInfo(){
+            document.getElementById('infoPanel').classList.toggle('open');
+        }
+        function extractContext(msg){
+            const m=msg.toLowerCase();
+            var nameMatch=m.match(/(?:m'appelle|je suis|mon nom|c'est pour)\s+(\w+)/i);
+            if(nameMatch)conversationContext.customer_name=nameMatch[1].charAt(0).toUpperCase()+nameMatch[1].slice(1);
+            var partyMatch=m.match(/(\d+)\s*(?:personnes|pers|couverts|on sera|on est)/);
+            if(partyMatch){conversationContext.customer_party_size=parseInt(partyMatch[1]);if(parseInt(partyMatch[1])>4)conversationContext.is_group=true;}
+            if(m.includes('enfant')||m.includes('gamin')||m.includes('petit'))conversationContext.has_children=true;
+            var allergyWords=['allergi','intoleran','sans gluten','sans lactose','vegetarien','vegan','noix','arachide'];
+            allergyWords.forEach(function(w){if(m.includes(w)&&conversationContext.customer_allergies.indexOf(w)<0)conversationContext.customer_allergies.push(w);});
+            if(m.includes('press')||m.includes('rapide')||m.includes('vite'))conversationContext.conversation_mood='rushed';
+            else if(m.includes('faim')||m.includes('affam')||m.includes('dalle'))conversationContext.conversation_mood='hungry';
+            else if(m.includes('hesite')||m.includes('sais pas'))conversationContext.conversation_mood='hesitant';
+            if(m.includes('sur place')||m.includes('table'))conversationContext.visit_type='sur_place';
+            else if(m.includes('emporter')||m.includes('take'))conversationContext.visit_type='emporter';
+            else if(m.includes('livr'))conversationContext.visit_type='livraison';
+            if(m.includes('reser'))conversationContext.reservation_in_progress=true;
+            var len=conversationHistory.length;
+            if(len<=2)conversationContext.conversation_stage='greeting';
+            else if(len<=6)conversationContext.conversation_stage='exploring';
+            else if(len<=10)conversationContext.conversation_stage='deciding';
+            else conversationContext.conversation_stage='closing';
+        }
+        function updateContextBanner(){
+            var b=document.getElementById('contextBanner');var parts=[];
+            if(conversationContext.customer_name)parts.push('\ud83d\udc64 '+conversationContext.customer_name);
+            if(conversationContext.customer_party_size)parts.push(conversationContext.customer_party_size+' pers.');
+            if(conversationContext.customer_date)parts.push(conversationContext.customer_date);
+            if(conversationContext.customer_time)parts.push(conversationContext.customer_time);
+            if(conversationContext.customer_allergies.length)parts.push('\u26a0\ufe0f '+conversationContext.customer_allergies.join(', '));
+            if(parts.length>0){b.textContent=parts.join(' \u2022 ');b.style.display='block';}
+            else{b.style.display='none';}
+        }
+        function buildContextSummary(){
+            var parts=[];
+            if(conversationContext.customer_name)parts.push('Nom: '+conversationContext.customer_name);
+            if(conversationContext.customer_party_size)parts.push('Personnes: '+conversationContext.customer_party_size);
+            if(conversationContext.customer_date)parts.push('Date: '+conversationContext.customer_date);
+            if(conversationContext.customer_time)parts.push('Heure: '+conversationContext.customer_time);
+            if(conversationContext.customer_allergies.length)parts.push('Allergies: '+conversationContext.customer_allergies.join(', '));
+            if(conversationContext.visit_type)parts.push('Type: '+conversationContext.visit_type);
+            if(conversationContext.has_children)parts.push('Enfants: oui');
+            if(conversationContext.is_group)parts.push('Groupe: oui');
+            if(conversationContext.conversation_mood!=='neutral')parts.push('Mood: '+conversationContext.conversation_mood);
+            if(conversationContext.reservation_in_progress)parts.push('Reservation: en cours');
+            parts.push('Stage: '+conversationContext.conversation_stage);
+            parts.push('Messages: '+conversationHistory.length);
+            return parts.join(' | ');
+        }
+        function safeParseJSON(text){
+            try{return JSON.parse(text);}catch(e){
+                var cleaned=text.replace(/[\x00-\x1f\x7f]/g,function(c){
+                    if(c==='\t')return'\\t';if(c==='\n')return'\\n';if(c==='\r')return'\\r';return'';
+                });
+                return JSON.parse(cleaned);
+            }
+        }
+        function trimHistory(){
+            if(conversationHistory.length>20){
+                var first4=conversationHistory.slice(0,4);
+                var last16=conversationHistory.slice(-16);
+                return first4.concat([{role:'user',content:'[conversation precedente]'}],last16);
+            }
+            return conversationHistory;
+        }
+        function detectAndHandleOrder(reply){
+            const tag='[COMMANDE_CONFIRMEE]';
+            const idx=reply.indexOf(tag);
+            if(idx===-1)return{handled:false,cleanReply:reply};
+            const beforeTag=reply.substring(0,idx).trim();
+            const afterTag=reply.substring(idx+tag.length).trim();
+            let orderJson=null;
+            try{
+                const jsonStart=afterTag.indexOf('{');
+                const jsonEnd=afterTag.lastIndexOf('}');
+                if(jsonStart!==-1&&jsonEnd!==-1){
+                    orderJson=JSON.parse(afterTag.substring(jsonStart,jsonEnd+1));
+                }
+            }catch(e){
+                console.error('Order JSON parse error:',e);
+            }
+            if(beforeTag){
+                addMessage(beforeTag,'bot');
+                conversationHistory.push({role:'assistant',content:beforeTag});
+            }
+            if(orderJson){
+                orderJson.resto_id=restoId;
+                orderJson.conversation_id=sessionId;
+                addMessage('\u23f3 Envoi de votre commande...','bot');
+                sendOrderToWebhook(orderJson);
+            }
+            return{handled:true,cleanReply:''};
+        }
+        async function sendOrderToWebhook(orderData){
+            try{
+                const resp=await fetch(WEBHOOK_URL,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        resto_id:restoId,
+                        message:'__order__',
+                        order_data:orderData,
+                        conversation_id:sessionId
+                    })
+                });
+                const raw=await resp.text();
+                let data;
+                try{data=safeParseJSON(raw);}catch(e){data={};}
+                const numero=data.numero_commande||Math.floor(Math.random()*900)+100;
+                const temps=data.temps_preparation||'15-20 min';
+                showOrderConfirmation(numero,temps);
+                playSound();
+            }catch(e){
+                addMessage('\u2705 Commande enregistr\u00e9e ! Rendez-vous au comptoir.','bot');
+                confirmedOrder={numero:'--',temps:'15-20 min'};
+                saveSession();
+            }
+        }
+        function detectRecap(reply){
+            const lines=reply.split('\n');
+            let hasRecapHeader=false;
+            let hasTotal=false;
+            let itemCount=0;
+            lines.forEach(function(l){
+                if(l.includes('R\u00e9cap')||l.includes('\ud83d\udccb'))hasRecapHeader=true;
+                if(l.includes('Total'))hasTotal=true;
+                if(l.match(/^\d+x\s/)||l.match(/^\s*\d+\s*x\s/))itemCount++;
+            });
+            return hasRecapHeader&&hasTotal&&itemCount>0;
+        }
+        async function sendMessage(){
+            var input=document.getElementById('userInput');
+            var text=input.value.trim();
+            if(!text)return;
+            userInteracted=true;
+            input.value='';
+            addMessage(text,'user');
+            conversationHistory.push({role:'user',content:text});
+            extractContext(text);
+            updateContextBanner();
+            showTyping(true);
+            if(quickBtnsVisible){document.getElementById('quickBtns').classList.add('hidden');quickBtnsVisible=false;}
+            document.getElementById('sendBtn').classList.remove('active');
+            saveSession();
+            try{
+                var controller=new AbortController();
+                var timeout=setTimeout(function(){controller.abort();},15000);
+                var resp=await fetch(WEBHOOK_URL,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        resto_id:restoId,
+                        message:text,
+                        conversation_history:trimHistory(),
+                        context:conversationContext,
+                        conversation_id:sessionId,
+                        message_count:conversationHistory.length,
+                        context_summary:buildContextSummary()
+                    }),
+                    signal:controller.signal
+                });
+                clearTimeout(timeout);
+                var raw=await resp.text();
+                var data=safeParseJSON(raw);
+                showTyping(false);
+                if(data.reply){
+                    var orderResult=detectAndHandleOrder(data.reply);
+                    if(!orderResult.handled){
+                        if(detectRecap(data.reply)){
+                            addMessage(data.reply,'bot','order-recap');
+                        }else{
+                            addMessage(data.reply,'bot');
+                        }
+                        conversationHistory.push({role:'assistant',content:data.reply});
+                    }
+                    playSound();
+                    if(!restoData&&data.resto){
+                        restoData=data.resto;
+                        applyRestoData(data.resto);
+                    }
+                    saveSession();
+                }else if(data.error){
+                    showError(data.error);
+                }else{
+                    showError('R\u00e9ponse inattendue du serveur.');
+                }
+            }catch(e){
+                showTyping(false);
+                if(e.name==='AbortError'){
+                    showError('Hmm, je mets un peu de temps... R\u00e9essayez dans un instant.');
+                }else{
+                    showError('Erreur de connexion. V\u00e9rifiez votre connexion internet.');
+                }
+            }
+        }
+        function applyRestoData(d){
+            document.getElementById('restoName').textContent=d.nom||'Restaurant';
+            document.getElementById('headerAvatar').textContent=(d.nom||'R').charAt(0).toUpperCase();
+            document.title=(d.nom||'Restaurant')+' - Assistant IA';
+            setTheme(d.couleur_principale,d.couleur_secondaire);
+            document.getElementById('infoAddr').textContent=(d.adresse||'')+', '+(d.ville||'');
+            document.getElementById('infoHours').textContent=d.horaires||'-';
+            document.getElementById('infoPhone').textContent=d.telephone||'-';
+            if(d.certification_halal)document.getElementById('infoHalal').textContent='Certifi\u00e9 '+d.certification_halal;
+            if(d.telephone)document.getElementById('callBtn').href='tel:'+d.telephone.replace(/\s/g,'');
+            if(d.adresse&&d.ville)document.getElementById('mapBtn').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(d.nom+' '+d.adresse+' '+d.ville);
+            renderQuickBtns(d.type_cuisine);
+        }
+        document.getElementById('userInput').addEventListener('keydown',function(e){
+            if(e.key==='Enter'&&!e.shiftKey)sendMessage();
         });
-        return JSON.parse(cleaned);
-      }
-    }
-
-    function trimHistory(){
-      if(conversationHistory.length>20){
-        var first4=conversationHistory.slice(0,4);
-        var last16=conversationHistory.slice(-16);
-        return first4.concat([{role:'user',content:'[conversation precedente]'}],last16);
-      }
-      return conversationHistory;
-    }
-
-    async function sendMessage(){
-      var input=document.getElementById('userInput');
-      var text=input.value.trim();
-      if(!text)return;
-      userInteracted=true;
-      input.value='';
-      addMessage(text,'user');
-      conversationHistory.push({role:'user',content:text});
-      extractContext(text);
-      updateContextBanner();
-      showTyping(true);
-      if(quickBtnsVisible){document.getElementById('quickBtns').classList.add('hidden');quickBtnsVisible=false;}
-      var sendBtn=document.getElementById('sendBtn');
-      sendBtn.classList.remove('active');
-      try{
-        var controller=new AbortController();
-        var timeout=setTimeout(function(){controller.abort();},15000);
-        var resp=await fetch(WEBHOOK_URL,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            resto_id:restoId,
-            message:text,
-            conversation_history:trimHistory(),
-            context:conversationContext,
-            conversation_id:sessionId,
-            message_count:conversationHistory.length,
-              context_summary:buildContextSummary()
-          }),
-          signal:controller.signal
+        document.getElementById('userInput').addEventListener('input',function(){
+            var btn=document.getElementById('sendBtn');
+            if(this.value.trim())btn.classList.add('active');
+            else btn.classList.remove('active');
         });
-        clearTimeout(timeout);
-        var raw=await resp.text();
-        var data=safeParseJSON(raw);
-        showTyping(false);
-        if(data.reply){
-          addMessage(data.reply,'bot');
-          conversationHistory.push({role:'assistant',content:data.reply});
-          playSound();
-          if(!restoData&&data.resto){
-            restoData=data.resto;
-            applyRestoData(data.resto);
-          }
-        }else if(data.error){
-          showError(data.error);
-        }else{
-          showError('R\u00e9ponse inattendue du serveur.');
+        if(window.visualViewport){
+            window.visualViewport.addEventListener('resize',function(){
+                document.documentElement.style.setProperty('--viewport-height',window.visualViewport.height+'px');
+                setTimeout(function(){
+                    document.getElementById('chatArea').scrollTop=document.getElementById('chatArea').scrollHeight;
+                },100);
+            });
         }
-      }catch(e){
-        showTyping(false);
-        if(e.name==='AbortError'){
-          showError('Hmm, je mets un peu de temps... R\u00e9essayez dans un instant.');
-        }else{
-          showError('Erreur de connexion. V\u00e9rifiez votre connexion internet.');
-        }
-      }
-    }
-
-    function applyRestoData(d){
-      document.getElementById('restoName').textContent=d.nom||'Restaurant';
-      document.getElementById('headerAvatar').textContent=(d.nom||'R').charAt(0).toUpperCase();
-      document.title=(d.nom||'Restaurant')+' - Assistant IA';
-      setTheme(d.couleur_principale,d.couleur_secondaire);
-      document.getElementById('infoAddr').textContent=(d.adresse||'')+', '+(d.ville||'');
-      document.getElementById('infoHours').textContent=d.horaires||'-';
-      document.getElementById('infoPhone').textContent=d.telephone||'-';
-      if(d.certification_halal)document.getElementById('infoHalal').textContent='Certifi\u00e9 '+d.certification_halal;
-      if(d.telephone)document.getElementById('callBtn').href='tel:'+d.telephone.replace(/\s/g,'');
-      if(d.adresse&&d.ville)document.getElementById('mapBtn').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(d.nom+' '+d.adresse+' '+d.ville);
-      renderQuickBtns(d.type_cuisine);
-    }
-
-    document.getElementById('userInput').addEventListener('keydown',function(e){
-      if(e.key==='Enter'&&!e.shiftKey)sendMessage();
-    });
-    document.getElementById('userInput').addEventListener('input',function(){
-      var btn=document.getElementById('sendBtn');
-      if(this.value.trim())btn.classList.add('active');
-      else btn.classList.remove('active');
-    });
-
-    if(window.visualViewport){
-      window.visualViewport.addEventListener('resize',function(){
-        document.documentElement.style.setProperty('--viewport-height',window.visualViewport.height+'px');
-        setTimeout(function(){
-          document.getElementById('chatArea').scrollTop=document.getElementById('chatArea').scrollHeight;
-        },100);
-      });
-    }
-
-    (async function init(){
-      if(!restoId){
-        document.getElementById('skeleton').remove();
-        showError('Restaurant introuvable. V\u00e9rifiez le lien.');
-        return;
-      }
-      try{
-        var controller=new AbortController();
-        var timeout=setTimeout(function(){controller.abort();},12000);
-        var resp=await fetch(WEBHOOK_URL,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({resto_id:restoId,message:'__init__',history:[],conversation_id:sessionId})
-        },{signal:controller.signal});
-        clearTimeout(timeout);
-        var raw=await resp.text();
-        var data=safeParseJSON(raw);
-        document.getElementById('skeleton').remove();
-        if(data.resto){
-          restoData=data.resto;
-          applyRestoData(data.resto);
-        }
-        if(data.reply){
-          addMessage(data.reply,'bot');
-          conversationHistory.push({role:'assistant',content:data.reply});
-        }
-      }catch(e){
-        document.getElementById('skeleton').remove();
-        if(e.name==='AbortError'){
-          showError('Le restaurant met du temps \u00e0 r\u00e9pondre. Rechargez la page.');
-        }else{
-          showError('Impossible de charger. V\u00e9rifiez votre connexion.');
-        }
-        renderQuickBtns('');
-      }
-    })();
-
-    window.addEventListener('online',function(){});
-    window.addEventListener('offline',function(){showError('Connexion perdue. Reconnectez-vous pour continuer.');});
-  </script>
-  </body>
+        (async function init(){
+            if(!restoId){
+                document.getElementById('skeleton').remove();
+                showError('Restaurant introuvable. V\u00e9rifiez le lien.');
+                return;
+            }
+            const sessionRestored=restoreSession();
+            if(sessionRestored){
+                document.getElementById('skeleton').remove();
+                if(restoData){
+                    applyRestoData(restoData);
+                }
+                conversationHistory.forEach(function(msg){
+                    addMessage(msg.content,msg.role==='user'?'user':'bot');
+                });
+                if(confirmedOrder){
+                    showOrderBanner(confirmedOrder.numero,confirmedOrder.temps);
+                    addMessage('Votre commande #'+confirmedOrder.numero+' est toujours en cours. Rendez-vous au comptoir pour payer et r\u00e9cup\u00e9rer !','bot');
+                }
+                if(currentOrder&&!confirmedOrder){
+                    addMessage('Vous aviez une commande en cours. Voulez-vous continuer ?','bot');
+                }
+                if(conversationHistory.length>0){
+                    quickBtnsVisible=false;
+                    document.getElementById('quickBtns').classList.add('hidden');
+                }
+                saveSession();
+                return;
+            }
+            try{
+                var controller=new AbortController();
+                var timeout=setTimeout(function(){controller.abort();},12000);
+                var resp=await fetch(WEBHOOK_URL,{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({resto_id:restoId,message:'__init__',history:[],conversation_id:sessionId})
+                },{signal:controller.signal});
+                clearTimeout(timeout);
+                var raw=await resp.text();
+                var data=safeParseJSON(raw);
+                document.getElementById('skeleton').remove();
+                if(data.resto){
+                    restoData=data.resto;
+                    applyRestoData(data.resto);
+                }
+                if(data.reply){
+                    addMessage(data.reply,'bot');
+                    conversationHistory.push({role:'assistant',content:data.reply});
+                    saveSession();
+                }
+            }catch(e){
+                document.getElementById('skeleton').remove();
+                if(e.name==='AbortError'){
+                    showError('Le restaurant met du temps \u00e0 r\u00e9pondre. Rechargez la page.');
+                }else{
+                    showError('Impossible de charger. V\u00e9rifiez votre connexion.');
+                }
+                renderQuickBtns('');
+            }
+        })();
+        window.addEventListener('online',function(){});
+        window.addEventListener('offline',function(){showError('Connexion perdue. Reconnectez-vous pour continuer.');});
+    <\/script>
+</body>
 </html>
