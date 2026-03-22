@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        :root{
+        :root{h
             --primary:#FF6B00;--secondary:#FFD700;--bg:#0a0a0a;--chat-bg:#111111;
             --user-bubble:var(--primary);--bot-bubble:#1a1a1a;
             --text:rgba(255,255,255,0.9);--text-muted:rgba(255,255,255,0.5);
@@ -578,7 +578,7 @@
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({resto_id:restoId,message:'__init__',history:[],conversation_id:sessionId})
-                },{signal:controller.signal});
+                ,signal:controller.signal});
                 clearTimeout(timeout);
                 var raw=await resp.text();
                 var data=safeParseJSON(raw);
