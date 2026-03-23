@@ -1,4 +1,4 @@
-h<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@ h<!DOCTYPE html>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         *{margin:0;padding:0;box-sizing:border-box}
-        :root{h
+        :root{
             --primary:#FF6B00;--secondary:#FFD700;--bg:#0a0a0a;--chat-bg:#111111;
             --user-bubble:var(--primary);--bot-bubble:#1a1a1a;
             --text:rgba(255,255,255,0.9);--text-muted:rgba(255,255,255,0.5);
@@ -383,7 +383,7 @@ h<!DOCTYPE html>
             }
             return conversationHistory;
         }
-        function detectAndHandleOrder(reply){
+        async function detectAndHandleOrder(reply){
             const tag='[COMMANDE_CONFIRMEE]';
             const idx=reply.indexOf(tag);
             if(idx===-1)return{handled:false,cleanReply:reply};
@@ -407,7 +407,7 @@ h<!DOCTYPE html>
                 orderJson.resto_id=restoId;
                 orderJson.conversation_id=sessionId;
                 addMessage('\u23f3 Envoi de votre commande...','bot');
-                sendOrderToWebhook(orderJson);
+                await sendOrderToWebhook(orderJson);
             }
             return{handled:true,cleanReply:''};
         }
@@ -464,7 +464,7 @@ h<!DOCTYPE html>
             saveSession();
             try{
                 var controller=new AbortController();
-                var timeout=setTimeout(function(){controller.abort();},15000);
+                var timeout=setTimeout(function(){controller.abort();},25000);
                 var resp=await fetch(WEBHOOK_URL,{
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
@@ -484,7 +484,7 @@ h<!DOCTYPE html>
                 var data=safeParseJSON(raw);
                 showTyping(false);
                 if(data.reply){
-                    var orderResult=detectAndHandleOrder(data.reply);
+                    var orderResult=await detectAndHandleOrder(data.reply);
                     if(!orderResult.handled){
                         if(detectRecap(data.reply)){
                             addMessage(data.reply,'bot','order-recap');
@@ -509,7 +509,7 @@ h<!DOCTYPE html>
                 if(e.name==='AbortError'){
                     showError('Hmm, je mets un peu de temps... R\u00e9essayez dans un instant.');
                 }else{
-                    showError('Erreur de connexion. V\u00e9rifiez votre connexion internet.');
+                    showError('Erreur de connexion. R\u00e9essayez ou rechargez la page.');
                 }
             }
         }
