@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+  <html lang="fr">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activation - IAbot</title>
+  <style>
+  *{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e0e0e0;min-height:100vh}
+.container{max-width:500px;margin:0 auto;padding:20px}
+.logo{text-align:center;padding:20px 0 10px;font-size:1.5rem;font-weight:700;color:#fff;letter-spacing:1px}
+.progress-bar{display:flex;gap:6px;margin-bottom:30px}
+.progress-bar .step{flex:1;height:4px;border-radius:2px;background:#2a2a4a;transition:background .3s}
+.progress-bar .step.active{background:#6c5ce7}
+.progress-bar .step.done{background:#00b894}
+.step-label{text-align:center;color:#a0a0c0;font-size:.85rem;margin-bottom:20px}
+.section{display:none;animation:fadeIn .3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+h2{font-size:1.2rem;color:#fff;margin-bottom:20px;text-align:center}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.9rem;color:#b0b0d0;margin-bottom:6px}
+.form-group input[type="text"],.form-group input[type="tel"],.form-group input[type="number"],.form-group textarea,.form-group select{width:100%;padding:12px;background:#16213e;border:1px solid #2a2a4a;border-radius:8px;color:#fff;font-size:1rem;outline:none;transition:border .2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#6c5ce7}
+.form-group textarea{min-height:150px;resize:vertical}
+.form-group .help{font-size:.8rem;color:#707090;margin-top:4px}
+.color-row{display:flex;gap:12px}
+.color-row .form-group{flex:1}
+.color-row input[type="color"]{width:100%;height:44px;padding:4px;background:#16213e;border:1px solid #2a2a4a;border-radius:8px;cursor:pointer}
+.radio-group,.checkbox-group{display:flex;flex-wrap:wrap;gap:10px}
+.radio-group label,.checkbox-group label{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#16213e;border:1px solid #2a2a4a;border-radius:8px;cursor:pointer;font-size:.9rem;transition:border .2s,background .2s}
+.radio-group input:checked+span,.checkbox-group input:checked+span{color:#6c5ce7}
+.radio-group label:has(input:checked),.checkbox-group label:has(input:checked){border-color:#6c5ce7;background:#1e2a4a}
+.radio-group input,.checkbox-group input{accent-color:#6c5ce7}
+.steps-guide{background:#16213e;border-radius:12px;padding:16px;margin-bottom:16px}
+.steps-guide .guide-step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #2a2a4a}
+.steps-guide .guide-step:last-child{border-bottom:none}
+.guide-step .num{width:28px;height:28px;background:#6c5ce7;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;color:#fff}
+.guide-step p{font-size:.9rem;line-height:1.4}
+.guide-step a{color:#6c5ce7}
+.btn-row{display:flex;gap:12px;margin-top:24px}
+.btn{flex:1;padding:14px;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-prev{background:#2a2a4a;color:#e0e0e0}
+.btn-next{background:#6c5ce7;color:#fff}
+.btn-submit{background:#00b894;color:#fff;flex:2}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.upload-zone{border:2px dashed #2a2a4a;border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:border-color .2s;margin-top:8px}
+.upload-zone:hover{border-color:#6c5ce7}
+.upload-zone p{color:#707090;font-size:.9rem}
+.upload-zone .icon{font-size:2rem;margin-bottom:8px}
+  .horaires-grid{display:grid;gap:8px}
+.horaire-row{display:flex;align-items:center;gap:8px;background:#16213e;padding:10px;border-radius:8px}
+.horaire-row .day{width:40px;font-size:.85rem;font-weight:600;color:#b0b0d0}
+.horaire-row input[type="time"]{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;color:#fff;padding:6px 8px;font-size:.85rem;flex:1}
+.horaire-row .ferme-label{font-size:.8rem;color:#707090;display:flex;align-items:center;gap:4px}
+.error-msg{color:#ff6b6b;font-size:.8rem;margin-top:4px;display:none}
+    .form-group.error input,.form-group.error textarea{border-color:#ff6b6b}
+    .form-group.error .error-msg{display:block}
+    .success-screen{text-align:center;padding:40px 20px}
+.success-screen .check{font-size:4rem;margin-bottom:20px}
+.success-screen h2{font-size:1.4rem;margin-bottom:12px}
+.success-screen p{color:#a0a0c0;margin-bottom:20px;line-height:1.5}
+.success-screen a{color:#6c5ce7;text-decoration:none}
+.autre-field{display:none;margin-top:8px}
+.autre-field.visible{display:block}
+</style>
+  </head>
+  <body>
+  <div class="container">
+  <div class="logo">IAbot</div>
+  <div class="progress-bar"><div class="step active" data-s="1"></div><div class="step" data-s="2"></div><div class="step" data-s="3"></div><div class="step" data-s="4"></div><div class="step" data-s="5"></div></div>
+  <div class="step-label" id="stepLabel">1/5 - Infos du restaurant</div>
+  <div class="section active" id="s1">
+<h2>Infos du restaurant</h2>
+<div class="form-group"><label>Nom du restaurant</label><input type="text" id="nom" readonly><div class="error-msg">Ce champ est obligatoire</div></div>
+  <div class="form-group"><label>Adresse compl&egrave;te</label><input type="text" id="adresse" placeholder="28 Av. Georges Clemenceau, 78500 Sartrouville"><div class="error-msg">Ce champ est obligatoire</div></div>
+  <div class="form-group"><label>T&eacute;l&eacute;phone</label><input type="tel" id="telephone" placeholder="01 39 13 XX XX"><div class="error-msg">Ce champ est obligatoire</div></div>
+<div class="form-group"><label>Horaires d'ouverture</label><div class="horaires-grid" id="horairesGrid"></div></div>
+<div class="btn-row"><div style="flex:1"></div><button class="btn btn-next" onclick="goStep(2)">Suivant</button></div>
+</div>
+<div class="section" id="s2">
+<h2>Votre menu</h2>
+<div class="form-group"><label>Menu complet</label><textarea id="menu" placeholder="Listez vos plats avec les prix.&#10;&#10;Exemple :&#10;Burgers :&#10;Double Cheese - 8,50 euros&#10;Menu Double Cheese (burger + frites + boisson) - 13,50 euros"></textarea><div class="help">Listez toutes les cat&eacute;gories, plats et prix. Plus c'est d&eacute;taill&eacute;, mieux l'assistant r&eacute;pondra.</div><div class="error-msg">Le menu est obligatoire</div></div>
+<div class="form-group"><label>Ou envoyez une photo de votre carte</label><div class="upload-zone" id="uploadZone" onclick="document.getElementById('menuPhoto').click()"><div class="icon">&#128247;</div><p>Cliquez pour choisir une photo</p><p id="uploadName" style="color:#6c5ce7;display:none"></p></div><input type="file" id="menuPhoto" accept="image/*" style="display:none" onchange="handleUpload(this)"></div>
+<div class="btn-row"><button class="btn btn-prev" onclick="goStep(1)">Retour</button><button class="btn btn-next" onclick="goStep(3)">Suivant</button></div>
+</div>
+<div class="section" id="s3">
+<h2>Personnalisation</h2>
+<div class="color-row"><div class="form-group"><label>Couleur principale</label><input type="color" id="couleur1" value="#c1121f"></div><div class="form-group"><label>Couleur secondaire</label><input type="color" id="couleur2" value="#003049"></div></div>
+<div class="form-group"><label>Style du restaurant</label><div class="radio-group"><label><input type="radio" name="style" value="decontracte" checked><span>D&eacute;contract&eacute;</span></label><label><input type="radio" name="style" value="familial"><span>Familial</span></label><label><input type="radio" name="style" value="chic"><span>Chic</span></label></div></div>
+<div class="form-group"><label>Vos 2-3 plats stars</label><input type="text" id="specialites" placeholder="Ex: Double Cheese, Menu Country"><div class="error-msg">Ce champ est obligatoire</div></div>
+  <div class="form-group"><label>Allerg&egrave;nes courants</label><div class="checkbox-group"><label><input type="checkbox" value="gluten"><span>Gluten</span></label><label><input type="checkbox" value="noix"><span>Noix</span></label><label><input type="checkbox" value="lait"><span>Lait</span></label><label><input type="checkbox" value="oeufs"><span>Oeufs</span></label><label><input type="checkbox" value="autre"><span>Autre</span></label></div></div>
+<div class="btn-row"><button class="btn btn-prev" onclick="goStep(2)">Retour</button><button class="btn btn-next" onclick="goStep(4)">Suivant</button></div>
+  </div>
+  <div class="section" id="s4">
+<h2>Recevoir les commandes</h2>
+<div class="steps-guide"><div class="guide-step"><div class="num">1</div><p>T&eacute;l&eacute;chargez <a href="https://telegram.org" target="_blank">Telegram</a> (gratuit)</p></div><div class="guide-step"><div class="num">2</div><p>Cr&eacute;ez un groupe <strong>"Commandes [votre resto]"</strong></p></div><div class="guide-step"><div class="num">3</div><p>Ajoutez <strong>@Aifood0_bot</strong> dans le groupe</p></div><div class="guide-step"><div class="num">4</div><p>Envoyez un message puis copiez l'ID ci-dessous</p></div></div>
+<div class="form-group"><label>Chat ID du groupe Telegram</label><input type="text" id="chatId" placeholder="Ex: -1001234567890"><div class="help">Pas s&ucirc;r ? R&eacute;pondez &agrave; notre email et on s'en occupe pour vous.</div></div>
+  <p style="margin-top:12px;font-size:.85rem"><a href="https://chat.iabot.live/guide-telegram" target="_blank" style="color:#6c5ce7">Guide d&eacute;taill&eacute; pour configurer Telegram</a></p>
+<div class="btn-row"><button class="btn btn-prev" onclick="goStep(3)">Retour</button><button class="btn btn-next" onclick="goStep(5)">Suivant</button></div>
+  </div>
+  <div class="section" id="s5">
+  <h2>Certification halal</h2>
+  <div class="form-group"><div class="radio-group"><label><input type="radio" name="halal" value="AVS"><span>AVS</span></label><label><input type="radio" name="halal" value="ACHAHADA"><span>ACHAHADA</span></label><label><input type="radio" name="halal" value="autre"><span>Autre</span></label><label><input type="radio" name="halal" value="auto_declare" checked><span>Auto-d&eacute;clar&eacute;</span></label></div><div class="autre-field" id="autreHalal"><input type="text" id="halalAutre" placeholder="Pr&eacute;cisez la certification"></div></div>
+  <div class="btn-row"><button class="btn btn-prev" onclick="goStep(4)">Retour</button><button class="btn btn-submit" onclick="submitForm()" id="submitBtn">Activer mon assistant</button></div>
+</div>
+<div class="section" id="sSuccess"><div class="success-screen"><div class="check">&#10004;&#65039;</div><h2>Votre assistant est activ&eacute; !</h2><p>Nous personnalisons votre chatbot avec votre menu. Vous recevrez un email de confirmation.</p><a href="#" id="chatbotLink">Tester votre chatbot</a></div></div>
+</div>
+<script>
+const params=new URLSearchParams(window.location.search);const restoId=params.get('resto')||'';const restoNom=restoId.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());document.getElementById('nom').value=restoNom;document.getElementById('chatbotLink').href='https://chat.iabot.live/chat/?resto='+restoId;const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];const grid=document.getElementById('horairesGrid');days.forEach(d=>{const row=document.createElement('div');row.className='horaire-row';row.innerHTML='<span class="day">'+d+'</span><input type="time" value="11:30" data-day="'+d+'" data-type="open"><span style="color:#707090">-</span><input type="time" value="23:00" data-day="'+d+'" data-type="close"><label class="ferme-label"><input type="checkbox" data-day="'+d+'" data-type="ferme"><span>Ferm&eacute;</span></label>';grid.appendChild(row)});document.querySelectorAll('input[name="halal"]').forEach(r=>{r.addEventListener('change',()=>{document.getElementById('autreHalal').classList.toggle('visible',r.value==='autre'&&r.checked)})});let currentStep=1;function goStep(n){if(n>currentStep&&!validateStep(currentStep))return;document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('s'+n).classList.add('active');document.querySelectorAll('.progress-bar .step').forEach(s=>{const sn=parseInt(s.dataset.s);s.classList.toggle('active',sn===n);s.classList.toggle('done',sn<n)});const labels=['Infos du restaurant','Menu complet','Personnalisation','Telegram','Certification halal'];document.getElementById('stepLabel').textContent=n+'/5 - '+labels[n-1];currentStep=n;window.scrollTo(0,0)}function validateStep(n){let valid=true;if(n===1){['adresse','telephone'].forEach(id=>{const el=document.getElementById(id);const fg=el.closest('.form-group');if(!el.value.trim()){fg.classList.add('error');valid=false}else{fg.classList.remove('error')}})};if(n===2){const menu=document.getElementById('menu');const photo=document.getElementById('menuPhoto');const fg=menu.closest('.form-group');if(!menu.value.trim()&&!photo.files.length){fg.classList.add('error');valid=false}else{fg.classList.remove('error')}};if(n===3){const sp=document.getElementById('specialites');const fg=sp.closest('.form-group');if(!sp.value.trim()){fg.classList.add('error');valid=false}else{fg.classList.remove('error')}};return valid}function handleUpload(input){if(input.files.length){document.getElementById('uploadName').textContent=input.files[0].name;document.getElementById('uploadName').style.display='block'}}function getHoraires(){let h=[];days.forEach(d=>{const ferme=document.querySelector('input[data-day="'+d+'"][data-type="ferme"]').checked;if(ferme){h.push(d+': Ferme')}else{const o=document.querySelector('input[data-day="'+d+'"][data-type="open"]').value;const c=document.querySelector('input[data-day="'+d+'"][data-type="close"]').value;h.push(d+': '+o+'-'+c)}});return h.join(' | ')}async function submitForm(){const btn=document.getElementById('submitBtn');btn.disabled=true;btn.textContent='Envoi en cours...';const allergenes=Array.from(document.querySelectorAll('.checkbox-group input:checked')).map(i=>i.value).join(', ');const halalVal=document.querySelector('input[name="halal"]:checked')?.value||'';const certification=halalVal==='autre'?document.getElementById('halalAutre').value:halalVal;const data={resto_id:restoId,nom:document.getElementById('nom').value,adresse:document.getElementById('adresse').value,telephone:document.getElementById('telephone').value,horaires:getHoraires(),menu:document.getElementById('menu').value,couleur_principale:document.getElementById('couleur1').value,couleur_secondaire:document.getElementById('couleur2').value,style:document.querySelector('input[name="style"]:checked')?.value||'',specialites:document.getElementById('specialites').value,allergenes:allergenes,certification_halal:certification,telegram_chat_id:document.getElementById('chatId').value};try{const resp=await fetch('https://hook.eu1.make.com/ONBOARDING_WEBHOOK_URL',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});if(resp.ok){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('sSuccess').classList.add('active');document.querySelectorAll('.progress-bar .step').forEach(s=>s.classList.add('done'));document.getElementById('stepLabel').textContent='Termine'}else{throw new Error('Erreur serveur')}}catch(e){btn.disabled=false;btn.textContent='Activer mon assistant';alert('Erreur lors de l envoi. Verifiez votre connexion et reessayez.')}}
+</script>
+</body>
+</html>
