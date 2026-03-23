@@ -577,7 +577,7 @@
                 var resp=await fetch(WEBHOOK_URL,{
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({resto_id:restoId,message:'__init__',history:[],conversation_id:sessionId})
+                    body:JSON.stringify({resto_id:restoId,message:'__init__',conversation_history:[{role:'user',content:'Bonjour'}],conversation_id:sessionId})
                 ,signal:controller.signal});
                 clearTimeout(timeout);
                 var raw=await resp.text();
