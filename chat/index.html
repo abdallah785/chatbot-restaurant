@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+h<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -127,7 +127,7 @@
         const restoId=params.get('resto')||'';
         const STORAGE_KEY='iabot_session_'+restoId;
         let restoData=null;
-        let conversationHistory=[];
+        let conversationHistory=[];let clientPhone='';
         let sessionId='s_'+Date.now()+'_'+Math.random().toString(36).substr(2,6);
         let userInteracted=false;
         let quickBtnsVisible=true;
@@ -456,7 +456,7 @@
             input.value='';
             addMessage(text,'user');
             conversationHistory.push({role:'user',content:text});
-            extractContext(text);
+            extractContext(text);var pm=text.match(/(?:0[67]\d{8}|\+33[67]\d{8})/);if(pm){clientPhone=pm[0].replace(/[\s.-]/g,'');if(clientPhone.startsWith('+33'))clientPhone='0'+clientPhone.substring(3);}
             updateContextBanner();
             showTyping(true);
             if(quickBtnsVisible){document.getElementById('quickBtns').classList.add('hidden');quickBtnsVisible=false;}
@@ -472,7 +472,7 @@
                         resto_id:restoId,
                         message:text,
                         conversation_history:JSON.stringify(trimHistory()),
-                        context:conversationContext,
+                        client_phone:clientPhone,context:conversationContext,
                         conversation_id:sessionId,
                         message_count:conversationHistory.length,
                         context_summary:buildContextSummary()
@@ -577,7 +577,7 @@
                 var resp=await fetch(WEBHOOK_URL,{
                     method:'POST',
                     headers:{'Content-Type':'application/json'},
-                    body:JSON.stringify({resto_id:restoId,message:'__init__',conversation_history:JSON.stringify([{role:'user',content:'Bonjour'}]),conversation_id:sessionId})
+                    body:JSON.stringify({resto_id:restoId,message:'__init__',conversation_history:JSON.stringify([{role:'user',content:'Bonjour'}]),client_phone:'',conversation_id:sessionId})
                 ,signal:controller.signal});
                 clearTimeout(timeout);
                 var raw=await resp.text();
