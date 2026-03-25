@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assistant IA Restaurant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;40h0;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;40hh0;500;600;700&display=swap" rel="stylesheet">
     <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -224,7 +224,7 @@ function safeParseJSON(text){
         });
         try{return JSON.parse(cleaned);}catch(e2){
             console.error('JSON parse failed:',e2);
-            return null;
+            var ri=text.indexOf('"reply":"'); var rsi=text.indexOf('","resto":'); if(ri!==-1&&rsi!==-1){var rpl=text.substring(ri+9,rsi); var restoStr=text.substring(rsi+9); var restoEnd=restoStr.lastIndexOf('}}'); if(restoEnd!==-1){try{var resto=JSON.parse(restoStr.substring(0,restoEnd+2));return{reply:rpl,resto:resto};}catch(e3){}} return{reply:rpl,resto:null};} return null;
         }
     }
 }
