@@ -72,7 +72,12 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     .error-banner{background:#ff6b6b;color:#fff;padding:14px 18px;border-radius:10px;text-align:center;margin-top:16px;font-size:.9rem}
     .error-banner a{color:#fff;text-decoration:underline}
-  </style>
+  .logo-upload-zone{border:2px dashed #2a2a4a;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.logo-upload-zone:hover{border-color:#6c5ce7}
+.logo-preview{width:80px;height:80px;border-radius:50%;overflow:hidden;border:2px solid #6c5ce7;display:none}
+.logo-preview img{width:100%;height:100%;object-fit:cover}
+.logo-preview.visible{display:block}
+</style>
 </head>
 <body>
   <div class="container">
@@ -175,48 +180,52 @@
           <label><input type="checkbox" value="autre"><span>Autre</span></label>
         </div>
       </div>
-      <div class="btn-row">
+      <div class="form-group">
+<label>Logo de votre restaurant (optionnel)</label>
+<div class="logo-upload-zone" onclick="document.getElementById('logoFile').click()">
+<div class="logo-preview" id="logoPreview"><img id="logoImg" src="" alt="logo"></div>
+<p style="color:#707090;font-size:.9rem">Cliquez pour choisir votre logo</p>
+<p style="color:#505070;font-size:.8rem">Format carr&eacute; recommand&eacute; (JPG, PNG)</p>
+</div>
+<input type="file" id="logoFile" accept="image/*" style="display:none" onchange="handleLogoUpload(this)">
+</div>
+<div class="btn-row">
         <button class="btn btn-prev" onclick="goStep(2)">Retour</button>
         <button class="btn btn-next" onclick="goStep(4)">Suivant</button>
       </div>
     </div>
 
     <!-- SECTION 4 : Telegram -->
-    <div class="section" id="s4">
-      <h2>Recevoir les commandes</h2>
-      <div class="steps-guide">
-        <div class="guide-step">
-          <div class="num">1</div>
-          <p>T&eacute;l&eacute;chargez <a href="https://telegram.org" target="_blank">Telegram</a> (gratuit)</p>
-        </div>
-        <div class="guide-step">
-          <div class="num">2</div>
-          <p>Cr&eacute;ez un groupe <strong>"Commandes [votre resto]"</strong></p>
-        </div>
-        <div class="guide-step">
-          <div class="num">3</div>
-          <p>Ajoutez <strong>@Aifood0_bot</strong> dans le groupe</p>
-        </div>
-        <div class="guide-step">
-          <div class="num">4</div>
-          <p>Envoyez un message puis copiez l'ID ci-dessous</p>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Chat ID du groupe Telegram</label>
-        <input type="text" id="chatId" placeholder="Ex: -1001234567890">
-        <div class="help">Pas s&ucirc;r ? R&eacute;pondez &agrave; notre email et on s'en occupe pour vous.</div>
-      </div>
-      <p style="margin-top:12px;font-size:.85rem">
-        <a href="https://chat.iabot.live/guide-telegram" target="_blank" style="color:#6c5ce7">Guide d&eacute;taill&eacute; pour configurer Telegram</a>
-      </p>
-      <div class="btn-row">
-        <button class="btn btn-prev" onclick="goStep(3)">Retour</button>
-        <button class="btn btn-next" onclick="goStep(5)">Suivant</button>
-      </div>
-    </div>
-
-    <!-- SECTION 5 : Certification halal (BUG 2 FIX - AVS + ACHAHADA) -->
+<div class="section" id="s4">
+<h2>Recevoir les commandes</h2>
+<p style="text-align:center;color:#a0a0c0;margin-bottom:20px;line-height:1.5">Pour recevoir les commandes sur votre telephone, il vous suffit d'installer Telegram et de nous donner votre numero ou pseudo. On s'occupe de tout le reste !</p>
+<div class="steps-guide">
+<div class="guide-step">
+<div class="num">1</div>
+<p>Installez <a href="https://telegram.org" target="_blank">Telegram</a> (gratuit) :<br>
+<a href="https://apps.apple.com/app/telegram-messenger/id686449807" target="_blank" style="color:#6c5ce7">iPhone</a> |
+<a href="https://play.google.com/store/apps/details?id=org.telegram.messenger" target="_blank" style="color:#6c5ce7">Android</a></p>
+</div>
+<div class="guide-step">
+<div class="num">2</div>
+<p>Donnez-nous votre numero de telephone ou pseudo Telegram ci-dessous</p>
+</div>
+<div class="guide-step">
+<div class="num">3</div>
+<p><strong>On s'occupe de tout le reste !</strong> Vous recevrez les commandes directement sur Telegram.</p>
+</div>
+</div>
+<div class="form-group">
+<label>Numero de telephone ou pseudo Telegram</label>
+<input type="text" id="telegramContact" placeholder="Ex: 06 12 34 56 78 ou @monpseudo">
+<div class="help">On vous ajoutera au groupe de commandes. Rien de plus a faire de votre cote.</div>
+</div>
+<div class="btn-row">
+<button class="btn btn-prev" onclick="goStep(3)">Retour</button>
+<button class="btn btn-next" onclick="goStep(5)">Suivant</button>
+</div>
+</div>
+<!-- SECTION 5 : Certification halal (BUG 2 FIX - AVS + ACHAHADA) -->
     <div class="section" id="s5">
       <h2>Certification halal</h2>
       <div class="form-group">
@@ -316,7 +325,21 @@
       });
     }
 
-    // ===== Navigation =====
+    // ===== Logo Upload =====
+let logoFile = null;
+function handleLogoUpload(input) {
+if (input.files && input.files[0]) {
+logoFile = input.files[0];
+const reader = new FileReader();
+reader.onload = function(e) {
+document.getElementById('logoImg').src = e.target.result;
+document.getElementById('logoPreview').classList.add('visible');
+};
+reader.readAsDataURL(logoFile);
+}
+}
+
+// ===== Navigation =====
     let currentStep = 1;
 
     function goStep(n) {
@@ -406,8 +429,9 @@
         specialites: document.getElementById('specialites').value,
         allergenes: allergenes,
         certification_halal: certification,
-        telegram_chat_id: document.getElementById('chatId').value,
-        photos_count: uploadedFiles.length
+        telegram_contact: document.getElementById('telegramContact') ? document.getElementById('telegramContact').value : '',
+        photos_count: uploadedFiles.length,
+logo_data: null
       };
 
       // Convert photos to base64
@@ -421,6 +445,16 @@
         });
         data.photos = await Promise.all(photoPromises);
       }
+// Convert logo to base64 if present
+if (logoFile) {
+const lr = new FileReader();
+const logoData = await new Promise((resolve) => {
+lr.onload = () => resolve(lr.result);
+lr.readAsDataURL(logoFile);
+});
+data.logo_data = logoData;
+}
+
 
       try {
         const resp = await fetch('https://hook.eu1.make.com/kt7e7jvgfxjjk27mxwqcifbjphgfcce3', {
