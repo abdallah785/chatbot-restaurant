@@ -16,6 +16,7 @@
 body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg);height:var(--viewport-height);display:flex;flex-direction:column;overflow:hidden;color:var(--text)}
 .header{background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 70%,#000));color:#fff;padding:0 16px;height:70px;display:flex;align-items:center;gap:12px;position:relative;z-index:10;flex-shrink:0}
 .header-avatar{width:44px;height:44px;background:var(--secondary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#000;flex-shrink:0}
+.header-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
 .header-info{flex:1;min-width:0}
 .header-info h1{font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .header-sub{display:flex;align-items:center;gap:6px;font-size:12px;opacity:0.85;margin-top:2px}
@@ -87,7 +88,9 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
     .header-avatar{width:38px;height:38px;font-size:16px}
     .quick-btn{font-size:12px;padding:7px 12px}
 }
-    </style>
+    .system-msg{background:rgba(255,180,0,0.08);color:var(--secondary);border:1px solid rgba(255,180,0,0.2);padding:16px;border-radius:14px;font-size:13px;text-align:center;align-self:center;margin:10px 0;white-space:pre-line}
+.offline-banner{display:none;background:#ff4444;color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:500;flex-shrink:0}
+</style>
 </head>
 <body>
     <div class="header" id="header">
@@ -111,6 +114,7 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
     </div>
     <div class="context-banner" id="contextBanner"></div>
     <div class="order-banner" id="orderBanner"></div>
+    <div class="offline-banner" id="offlineBanner">Pas de connexion internet</div>
     <div class="chat-area" id="chatArea">
         <div class="skeleton" id="skeleton">
             <div class="skeleton-line"></div>
@@ -247,8 +251,8 @@ function addMessage(text,type,extraClass){
     if(extraClass)cls+=' '+extraClass;
     var html='';
     if(type==='bot'){
-        var letter=restoData?restoData.nom.charAt(0).toUpperCase():'?';
-        html+='<div class="bot-avatar-sm">'+letter+'</div>';
+        var letter=restoData?restoData.nom.charAt(0).toUpperCase():'?';var avatarContent=restoData&&restoData.logo_url?'<img src="'+restoData.logo_url+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">':letter;
+        html+='<div class="bot-avatar-sm">'+avatarContent+'</div>';
     }
     html+='<div><div class="'+cls+'">'+escapeHtml(text)+'</div><div class="msg-time">'+getTimeStr()+'</div></div>';
     row.innerHTML=html;
@@ -264,8 +268,8 @@ function addHtmlMessage(htmlContent,type,extraClass){
     if(extraClass)cls+=' '+extraClass;
     var content='';
     if(type==='bot'){
-        var letter=restoData?restoData.nom.charAt(0).toUpperCase():'?';
-        content+='<div class="bot-avatar-sm">'+letter+'</div>';
+        var letter=restoData?restoData.nom.charAt(0).toUpperCase():'?';var avatarContent=restoData&&restoData.logo_url?'<img src="'+restoData.logo_url+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">':letter;
+        content+='<div class="bot-avatar-sm">'+avatarContent+'</div>';
     }
     content+='<div><div class="'+cls+'">'+htmlContent+'</div><div class="msg-time">'+getTimeStr()+'</div></div>';
     row.innerHTML=content;
@@ -291,6 +295,12 @@ function clearMessages(){
     area.innerHTML='';
 }
 
+function displaySystemMessage(text){
+var area=document.getElementById('chatArea');
+var div=document.createElement('div');
+div.className='system-msg';div.textContent=text;
+area.appendChild(div);area.scrollTop=area.scrollHeight;
+}
 function setTheme(main,second){
     document.documentElement.style.setProperty('--primary',main||'#FF6B00');
     document.documentElement.style.setProperty('--secondary',second||'#FFD700');
@@ -687,7 +697,7 @@ async function sendMessage(){
 /* ===== APPLY RESTAURANT DATA ===== */
 function applyRestoData(d){
     document.getElementById('restoName').textContent=d.nom||'Restaurant';
-    document.getElementById('headerAvatar').textContent=(d.nom||'R').charAt(0).toUpperCase();
+    var avatarEl=document.getElementById('headerAvatar');if(d.logo_url){avatarEl.innerHTML='<img src="'+d.logo_url+'" alt="logo">';avatarEl.querySelector('img').onerror=function(){this.parentElement.textContent=(d.nom||'R').charAt(0).toUpperCase();};}else{avatarEl.textContent=(d.nom||'R').charAt(0).toUpperCase();}
     document.title=(d.nom||'Restaurant')+' - Assistant IA';
     setTheme(d.couleur_principale,d.couleur_secondaire);
     document.getElementById('infoAddr').textContent=(d.adresse||'')+', '+(d.ville||'');
@@ -734,6 +744,17 @@ if(window.visualViewport){
         if(restoData){
             applyRestoData(restoData);
         }
+/* STATUT CHECK on restored session */
+if(restoData.statut==='essai_expire'||restoData.statut==='churne'){
+var isExpire=restoData.statut==='essai_expire';
+var msg=isExpire?'La periode d\'essai de cet assistant est terminee.\n\nPour activer : https://buy.stripe.com/3cI8wR0hO3FagJHbZH5EY00\n359 euros/mois':'Cet assistant n\'est plus actif.';
+displaySystemMessage(msg);
+document.getElementById('userInput').disabled=true;
+if(isExpire)document.getElementById('userInput').placeholder='Essai termine';
+document.getElementById('sendBtn').disabled=true;
+document.getElementById('quickBtns').classList.add('hidden');
+return;
+}
         conversationHistory.forEach(function(msg){
             addMessage(msg.content,msg.role==='user'?'user':'bot');
         });
@@ -777,6 +798,28 @@ if(window.visualViewport){
             restoData=data.resto;
             applyRestoData(data.resto);
         }
+/* STATUT CHECK - POINT 1 */
+if(data.resto&&data.resto.statut){
+var st=data.resto.statut;
+if(st==='essai_expire'){
+var nbConv=data.resto.essai_nb_conversations||0;
+var nbCmd=data.resto.essai_nb_commandes||0;
+displaySystemMessage('La periode d\'essai de cet assistant est terminee.\n\nPendant votre essai, cet assistant a traite '+nbConv+' conversations et '+nbCmd+' commandes.\n\nPour activer votre assistant :\nhttps://buy.stripe.com/3cI8wR0hO3FagJHbZH5EY00\n\n359 euros/mois, sans engagement.\n\nIAbot');
+document.getElementById('userInput').disabled=true;
+document.getElementById('userInput').placeholder='Essai termine';
+document.getElementById('sendBtn').disabled=true;
+document.getElementById('quickBtns').classList.add('hidden');
+return;
+}
+if(st==='churne'){
+displaySystemMessage('Cet assistant n\'est plus actif.');
+document.getElementById('userInput').disabled=true;
+document.getElementById('sendBtn').disabled=true;
+document.getElementById('quickBtns').classList.add('hidden');
+return;
+}
+}
+
         if(data&&data.reply){
             addMessage(data.reply,'bot');
             conversationHistory.push({role:'assistant',content:data.reply});
@@ -798,9 +841,13 @@ if(window.visualViewport){
     }
 })();
 
-window.addEventListener('online',function(){});
+window.addEventListener('online',function(){
+document.getElementById('offlineBanner').style.display='none';
+displaySystemMessage('Connexion retablie !');
+});
 window.addEventListener('offline',function(){
-    addMessage('Connexion perdue. Reconnectez-vous pour continuer.','bot');
+document.getElementById('offlineBanner').style.display='block';
+displaySystemMessage('Pas de connexion internet. Reconnectez-vous pour utiliser l\'assistant.');
 });
 </script>
 </body>
