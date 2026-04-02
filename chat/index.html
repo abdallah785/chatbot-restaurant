@@ -221,6 +221,13 @@ function escapeHtml(t){
     var d=document.createElement('div');d.textContent=t;return d.innerHTML;
 }
 
+
+function formatBotText(t){
+  var safe=escapeHtml(t);
+  safe=safe.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  safe=safe.replace(/\n/g,'<br>');
+  return safe;
+}
 function safeParseJSON(text){
     try{return JSON.parse(text);}catch(e){
         var cleaned=text.replace(/[\x00-\x1f\x7f]/g,function(c){
@@ -367,6 +374,8 @@ function showOrderConfirmation(numero,temps){
     /* Post-order flow: show quick buttons and prompt after 2 seconds */
     setTimeout(function(){
         addMessage('Autre chose ? Vous pouvez continuer \u00e0 commander ou poser une question.','bot');
+        document.getElementById('userInput').disabled=false;
+        document.getElementById('userInput').placeholder='Message...';
         showQuickButtons();
     },2000);
 }
@@ -654,13 +663,20 @@ async function sendMessage(){
         
         showTyping(false);
         
-        if(data&&data.reply){
+        /* BUG #1 & #2: Handle server-side order confirmation */
+if(data&&data.commande===true){
+  if(data.reply){addHtmlMessage(formatBotText(data.reply),'bot');conversationHistory.push({role:'assistant',content:data.reply});}
+  var cnum=data.numero||'--';
+  showOrderConfirmation(cnum,'15-20 min');
+  playSound();
+  saveSession();
+}else if(data&&data.reply){
             var orderResult=await detectAndHandleOrder(data.reply);
             if(!orderResult.handled){
                 if(detectRecap(data.reply)){
-                    addMessage(data.reply,'bot','order-recap');
+                    addHtmlMessage(formatBotText(data.reply),'bot','order-recap');
                 }else{
-                    addMessage(data.reply,'bot');
+                    addHtmlMessage(formatBotText(data.reply),'bot');
                 }
                 conversationHistory.push({role:'assistant',content:data.reply});
             }
