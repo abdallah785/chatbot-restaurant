@@ -372,16 +372,14 @@ function showOrderConfirmation(numero,temps){
 }
 
 /* ===== QUICK BUTTONS ===== */
-function getQuickButtons(typeCuisine){
-    var t=(typeCuisine||'').toLowerCase();
-    if(t.includes('burger')||t.includes('kebab')||t.includes('tacos')||t.includes('fast'))
-        return[{text:'Voir les menus \ud83c\udf54',order:false},{text:"C'est halal ?",order:false},{text:'Horaires',order:false},{text:'Commander \ud83c\udf54',order:true}];
-    if(t.includes('pizza'))
-        return[{text:'Voir les pizzas \ud83c\udf55',order:false},{text:"C'est halal ?",order:false},{text:'Horaires',order:false},{text:'Commander \ud83c\udf54',order:true}];
-    if(t.includes('marocain')||t.includes('liban')||t.includes('turc')||t.includes('indien')||t.includes('oriental'))
-        return[{text:'Voir la carte \ud83c\udf7d\ufe0f',order:false},{text:"C'est halal ?",order:false},{text:'R\u00e9server',order:false},{text:'Commander \ud83c\udf54',order:true}];
-    return[{text:'Voir le menu \ud83d\udccb',order:false},{text:"C'est halal ?",order:false},{text:'Horaires',order:false},{text:'Commander \ud83c\udf54',order:true}];
-}
+function getQuickButtons(type_cuisine){
+            return [
+                {text:"Commander", msg:"Je veux commander", order:true},
+                {text:"Le menu", msg:"C'est quoi le menu ?", order:false},
+                {text:"Halal ?", msg:"Vous \u00eates certifi\u00e9 halal ?", order:false},
+                {text:"Horaires", msg:"Quels sont vos horaires ?", order:false}
+            ];
+        }
 
 function renderQuickBtns(typeCuisine){
     var c=document.getElementById('quickBtns');c.innerHTML='';
@@ -390,7 +388,7 @@ function renderQuickBtns(typeCuisine){
         var b=document.createElement('button');
         b.className='quick-btn'+(q.order?' order-btn':'');
         b.textContent=q.text;
-        b.onclick=function(){document.getElementById('userInput').value=q.text;sendMessage();};
+        b.onclick=function(){document.getElementById('userInput').value=(q.msg||q.text);sendMessage();};
         c.appendChild(b);
     });
 }
@@ -820,8 +818,8 @@ return;
 }
 }
 
-        if(data&&data.reply){
-            addMessage(data.reply,'bot');
+        if(data&&(data.welcome_message||data.reply)){
+            addMessage(data.welcome_message||data.reply,'bot');
             conversationHistory.push({role:'assistant',content:data.reply});
             saveSession();
         }else{
