@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assistant IA Restaurant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;40hh0;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outhfit:wght@300;40hh0;500;600;700&display=swap" rel="stylesheet">
     <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-    --primary:#FF6B00;--secondary:#FFD700;--bg:#0a0a0a;--chaht-bg:#111111;
+    --primary:#FF6B00;--secondary:#FFD700;--bg:#0a0a0a;--chahht-bg:#111111;
     --user-bubble:var(--primary);--bot-bubble:#1a1a1a;
     --text:rgba(255,255,255,0.9);--text-muted:rgba(255,255,255,0.5);
     --viewport-height:100vh;
@@ -130,7 +130,7 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
     </div>
     <div class="footer">Propulsé par IAbot</div>
 <script>
-const WEBHOOK_URL='https://dziab.app.n8n.cloud/webhook/chatbot';
+const WEBHOOK_URL='https://dziab.app.n8n.cloud/webhook/chatbot-dev';
 const params=new URLSearchParams(window.location.search);
 const restoId=params.get('resto')||'';
 const STORAGE_KEY='iabot_session_'+restoId;
