@@ -138,6 +138,11 @@
         <input type="file" id="menuPhotos" accept="image/*" multiple style="display:none" onchange="handleUpload(this)">
         <div class="preview-grid" id="previewGrid"></div>
       </div>
+      <div class="form-group" style="margin-top:20px">
+        <label>Questions pour la commande (optionnel)</label>
+        <div class="help">Quelles questions votre assistant doit poser aux clients pendant la commande ? Ex: Quelle sauce ? Salade tomate oignon ? Galette ou pain ?</div>
+        <textarea id="questionsCommande" rows="4" placeholder="Ex: Quelle sauce ? (blanche, algerienne, samourai, ketchup)&#10;Salade, tomate, oignon ?&#10;Galette ou pain ?"></textarea>
+      </div>
       <div class="btn-row">
         <button class="btn btn-prev" onclick="goStep(1)">Retour</button>
         <button class="btn btn-next" onclick="goStep(3)">Suivant</button>
@@ -423,6 +428,7 @@ reader.readAsDataURL(logoFile);
         telephone: document.getElementById('telephone').value,
         horaires: getHoraires(),
         menu: document.getElementById('menu').value,
+        questions_commande: document.getElementById('questionsCommande').value,
         couleur_principale: document.getElementById('couleur1').value,
         couleur_secondaire: document.getElementById('couleur2').value,
         style: document.querySelector('input[name="style"]:checked')?.value || '',
