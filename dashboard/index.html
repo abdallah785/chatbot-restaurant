@@ -2,189 +2,271 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>IAbot - Dashboard Analytics</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dashboard Restaurant</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
-.header{background:linear-gradient(135deg,#1e293b,#334155);padding:20px 30px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #f97316}
-.header h1{font-size:24px;color:#f97316}
-.header .logo{font-weight:800;font-size:28px;color:#fff}
-.header .logo span{color:#f97316}
-.controls{padding:20px 30px;display:flex;gap:15px;flex-wrap:wrap;align-items:center}
-.controls select,.controls input{background:#1e293b;border:1px solid #475569;color:#e2e8f0;padding:10px 15px;border-radius:8px;font-size:14px}
-.controls select:focus,.controls input:focus{outline:none;border-color:#f97316}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;padding:0 30px 20px}
-.stat-card{background:linear-gradient(135deg,#1e293b,#334155);border-radius:12px;padding:25px;border-left:4px solid #f97316;transition:transform .2s}
-.stat-card:hover{transform:translateY(-3px)}
-.stat-card .label{font-size:13px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
-.stat-card .value{font-size:36px;font-weight:800;color:#f97316;margin:8px 0}
-.stat-card .sub{font-size:12px;color:#64748b}
-.charts{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0 30px 30px}
-.chart-card{background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155}
-.chart-card h3{color:#f97316;margin-bottom:15px;font-size:16px}
-.chart-card canvas{max-height:300px}
-.questions-section{padding:0 30px 30px}
-.questions-card{background:#1e293b;border-radius:12px;padding:20px;border:1px solid #334155}
-.questions-card h3{color:#f97316;margin-bottom:15px}
-.question-item{background:#0f172a;padding:12px 16px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.question-item .q{color:#e2e8f0}
-.question-item .count{background:#f97316;color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700}
-.loading{text-align:center;padding:60px;color:#94a3b8;font-size:18px}
-.error{background:#7f1d1d;color:#fca5a5;padding:15px;border-radius:8px;margin:20px 30px}
-.argument{background:linear-gradient(135deg,#1e293b,#0f172a);border:2px solid #f97316;border-radius:12px;padding:20px;margin:0 30px 20px;text-align:center}
-.argument .big{font-size:28px;font-weight:800;color:#f97316}
-.argument .desc{color:#94a3b8;margin-top:5px}
-@media(max-width:768px){.charts{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+:root{--cp:#D32F2F;--cs:#FFC107}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a1a;color:#fff;padding-bottom:40px}
+.loading{display:flex;align-items:center;justify-content:center;height:100vh;font-size:18px;color:#aaa}
+.dashboard-header{background:var(--cp);padding:16px 20px;display:flex;align-items:center;gap:12px}
+.dashboard-header img{width:44px;height:44px;border-radius:10px;object-fit:cover;background:#fff}
+.header-info h1{font-size:18px;font-weight:700}
+.header-info p{font-size:13px;opacity:.85}
+.section{background:#2a2a2a;border-radius:12px;margin:12px;padding:16px}
+.section-title{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.time-selector{display:flex;gap:8px;flex-wrap:wrap}
+.time-btn{background:#3a3a3a;color:#fff;border:2px solid transparent;border-radius:8px;padding:10px 16px;cursor:pointer;font-size:14px;transition:all .2s}
+.time-btn.active{border-color:var(--cp);background:rgba(255,255,255,.1)}
+.time-btn:active{transform:scale(.95)}
+.cat-header{font-size:14px;font-weight:700;color:var(--cs);padding:10px 0 6px;border-bottom:1px solid #3a3a3a}
+.menu-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #333;gap:8px}
+.menu-item-info{flex:1;min-width:0}
+.menu-item-name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-item-price{font-size:14px;font-weight:600;color:var(--cs);white-space:nowrap}
+.menu-item-desc{font-size:12px;color:#aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-actions{display:flex;gap:6px;flex-shrink:0}
+.btn{background:var(--cp);color:#fff;border:none;border-radius:8px;padding:10px 18px;cursor:pointer;font-size:14px;font-weight:600;transition:opacity .2s;width:100%}
+.btn:active{opacity:.8}
+.btn-sm{background:transparent;color:var(--cp);border:1px solid var(--cp);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+.btn-sm.danger{color:#ff4444;border-color:#ff4444}
+.q-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #333;gap:8px}
+.q-item span{flex:1;font-size:14px}
+.order-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #333;font-size:13px;gap:8px}
+.order-left{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.order-num{font-weight:700;color:var(--cs)}
+.order-right{text-align:right;flex-shrink:0;color:#aaa;font-size:12px}
+.link-section a{color:var(--cs);word-break:break-all;font-size:13px}
+.qr-container{margin-top:12px;text-align:center}
+.qr-container img{width:180px;height:180px;border-radius:8px;background:#fff;padding:8px}
+input,select,textarea{background:#3a3a3a;color:#fff;border:1px solid #555;border-radius:8px;padding:10px 12px;font-size:14px;width:100%;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cp)}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:13px;color:#aaa;margin-bottom:4px}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:#2a2a2a;border-radius:12px;padding:20px;width:100%;max-width:400px}
+.modal h3{margin-bottom:16px;font-size:16px}
+.modal-actions{display:flex;gap:8px;margin-top:16px}
+.modal-actions .btn{flex:1}
+.btn-cancel{background:#3a3a3a}
+.status-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.status-active{background:#2e7d32;color:#fff}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:200;display:none;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.toast.show{display:block;animation:fadeInUp .3s}
+@keyframes fadeInUp{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 </style>
 </head>
 <body>
-<div class="header">
-<div class="logo">IA<span>bot</span></div>
-<h1>Dashboard Analytics</h1>
+<div id="app" class="loading">Chargement...</div>
+<div id="addModal" class="modal-overlay">
+<div class="modal">
+<h3 id="modalTitle">Ajouter un plat</h3>
+<div class="form-group"><label>Categorie</label><select id="modalCat"><option>BURGERS</option><option>MENUS</option><option>TACOS</option><option>BOISSONS</option><option>DESSERTS</option><option>ACCOMPAGNEMENTS</option><option>AUTRE</option></select></div>
+<div class="form-group"><label>Nom</label><input id="modalName" placeholder="Ex: Double Cheese"></div>
+<div class="form-group"><label>Prix</label><input id="modalPrice" type="number" step="0.5" placeholder="8.50"></div>
+<div class="form-group"><label>Description (optionnel)</label><input id="modalDesc" placeholder="Ex: Steak, cheddar, salade..."></div>
+<div class="modal-actions"><button class="btn btn-cancel" onclick="closeModal()">Annuler</button><button class="btn" onclick="saveItem()">Enregistrer</button></div>
 </div>
-<div class="controls">
-<select id="restoSelect"><option value="">Tous les restaurants</option></select>
-<input type="date" id="dateFrom">
-<input type="date" id="dateTo">
-<button onclick="loadData()" style="background:#f97316;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:700">Actualiser</button>
 </div>
-<div id="argument" class="argument" style="display:none">
-<div class="big" id="argText"></div>
-<div class="desc">Argument de vente pour la prospection</div>
+<div id="qModal" class="modal-overlay">
+<div class="modal">
+<h3 id="qModalTitle">Ajouter une question</h3>
+<div class="form-group"><label>Question</label><input id="qModalText" placeholder="Ex: Quelle sauce ?"></div>
+<div class="modal-actions"><button class="btn btn-cancel" onclick="closeQModal()">Annuler</button><button class="btn" onclick="saveQuestion()">Enregistrer</button></div>
 </div>
-<div class="stats" id="statsGrid">
-<div class="stat-card"><div class="label">Conversations</div><div class="value" id="totalConv">-</div><div class="sub">ce mois</div></div>
-<div class="stat-card"><div class="label">Messages</div><div class="value" id="totalMsg">-</div><div class="sub">ce mois</div></div>
-<div class="stat-card"><div class="label">Reservations</div><div class="value" id="totalRes">-</div><div class="sub">ce mois</div></div>
-<div class="stat-card"><div class="label">Taux conversion</div><div class="value" id="convRate">-</div><div class="sub">reservations / conversations</div></div>
 </div>
-<div class="charts">
-<div class="chart-card"><h3>Conversations par jour</h3><canvas id="chartConv"></canvas></div>
-<div class="chart-card"><h3>Messages par jour</h3><canvas id="chartMsg"></canvas></div>
-<div class="chart-card"><h3>Reservations par jour</h3><canvas id="chartRes"></canvas></div>
-<div class="chart-card"><h3>Top restaurants</h3><canvas id="chartTop"></canvas></div>
-</div>
-<div class="questions-section">
-<div class="questions-card"><h3>Questions les plus frequentes</h3><div id="questionsList"></div></div>
-</div>
+<div id="toast" class="toast"></div>
 <script>
-const AIRTABLE_BASE='appuCnzeiV1MZKAdt';
-const AIRTABLE_TABLE='tblVbfsR37yBLgv5i';
-const AIRTABLE_ANALYTICS='tblVbfsR37yBLgv5i';
-const TOKEN=new URLSearchParams(location.search).get('token')||'';
-let allRecords=[];
-let chartInstances={};
-async function fetchAirtable(table,params=''){
-  const url='https://api.airtable.com/v0/'+AIRTABLE_BASE+'/'+table+'?'+params;
-  const r=await fetch(url,{headers:{'Authorization':'Bearer '+TOKEN}});
-  if(!r.ok)throw new Error('Erreur API: '+r.status);
-  return r.json();
-}
-async function loadRestaurants(){
-  try{
-    const data=await fetchAirtable('Restaurants','fields%5B%5D=resto_id');
-    const sel=document.getElementById('restoSelect');
-    data.records.forEach(r=>{
-      if(r.fields.resto_id){
-        const o=document.createElement('option');
-        o.value=r.fields.resto_id;
-        o.textContent=r.fields.resto_id;
-        sel.appendChild(o);
-      }
-    });
-  }catch(e){console.error(e)}
-}
+const WEBHOOK_URL='https://dziab.app.n8n.cloud/webhook/dashboard-dev';
+const params=new URLSearchParams(window.location.search);
+const restoId=params.get('resto');
+let DATA=null;
+let menuData=[];
+let questionsData=[];
+let editIdx=-1;
+let editQIdx=-1;
+
+if(!restoId){document.getElementById('app').innerHTML='<p style="color:#ff4444;text-align:center;padding:40px">Parametre resto manquant</p>';}
+else{loadData();}
+
 async function loadData(){
   try{
-    let params='';
-    const resto=document.getElementById('restoSelect').value;
-    const from=document.getElementById('dateFrom').value;
-    const to=document.getElementById('dateTo').value;
-    let filters=[];
-    if(resto)filters.push("resto_id='"+resto+"'");
-    if(from)filters.push("IS_AFTER({date},'"+from+"')");
-    if(to)filters.push("IS_BEFORE({date},'"+to+"')");
-    if(filters.length)params='filterByFormula=AND('+encodeURIComponent(filters.join(','))+')';
-    const data=await fetchAirtable('Analytics',params);
-    allRecords=data.records.map(r=>r.fields);
-    updateStats();
-    updateCharts();
-    updateQuestions();
-    updateArgument();
-  }catch(e){
-    console.error(e);
-    document.getElementById('statsGrid').innerHTML='<div class="error">Erreur de chargement. Verifiez le token API.</div>';
-  }
+    const r=await fetch(WEBHOOK_URL+'?resto='+restoId);
+    DATA=await r.json();
+    if(DATA.error){document.getElementById('app').innerHTML='<p style="color:#ff4444;text-align:center;padding:40px">'+DATA.error+'</p>';return;}
+    document.documentElement.style.setProperty('--cp',DATA.couleur_principale);
+    document.documentElement.style.setProperty('--cs',DATA.couleur_secondaire);
+    menuData=parseMenu(DATA.menu);
+    questionsData=parseQuestions(DATA.questions_commande);
+    render();
+  }catch(e){document.getElementById('app').innerHTML='<p style="color:#ff4444;text-align:center;padding:40px">Erreur de chargement</p>';}
 }
-function updateStats(){
-  const conv=allRecords.reduce((s,r)=>s+(r.nb_conversations||0),0);
-  const msg=allRecords.reduce((s,r)=>s+(r.nb_messages||0),0);
-  const res=allRecords.reduce((s,r)=>s+(r.nb_reservations||0),0);
-  const rate=conv>0?((res/conv)*100).toFixed(1)+'%':'0%';
-  document.getElementById('totalConv').textContent=conv;
-  document.getElementById('totalMsg').textContent=msg;
-  document.getElementById('totalRes').textContent=res;
-  document.getElementById('convRate').textContent=rate;
-}
-function updateCharts(){
-  const byDate={};
-  allRecords.forEach(r=>{
-    const d=r.date||'inconnu';
-    if(!byDate[d])byDate[d]={conv:0,msg:0,res:0};
-    byDate[d].conv+=(r.nb_conversations||0);
-    byDate[d].msg+=(r.nb_messages||0);
-    byDate[d].res+=(r.nb_reservations||0);
-  });
-  const dates=Object.keys(byDate).sort();
-  const convData=dates.map(d=>byDate[d].conv);
-  const msgData=dates.map(d=>byDate[d].msg);
-  const resData=dates.map(d=>byDate[d].res);
-  const cfg={type:'line',options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'},grid:{color:'#1e293b'}},y:{ticks:{color:'#94a3b8'},grid:{color:'#334155'}}}}};
-  if(chartInstances.conv)chartInstances.conv.destroy();
-  if(chartInstances.msg)chartInstances.msg.destroy();
-  if(chartInstances.res)chartInstances.res.destroy();
-  if(chartInstances.top)chartInstances.top.destroy();
-  chartInstances.conv=new Chart(document.getElementById('chartConv'),{...cfg,data:{labels:dates,datasets:[{data:convData,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,0.1)',fill:true,tension:0.3}]}});
-  chartInstances.msg=new Chart(document.getElementById('chartMsg'),{...cfg,data:{labels:dates,datasets:[{data:msgData,borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,0.1)',fill:true,tension:0.3}]}});
-  chartInstances.res=new Chart(document.getElementById('chartRes'),{...cfg,data:{labels:dates,datasets:[{data:resData,borderColor:'#10b981',backgroundColor:'rgba(16,185,129,0.1)',fill:true,tension:0.3}]}});
-  const byResto={};
-  allRecords.forEach(r=>{
-    const id=r.resto_id||'inconnu';
-    byResto[id]=(byResto[id]||0)+(r.nb_conversations||0);
-  });
-  const sorted=Object.entries(byResto).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  chartInstances.top=new Chart(document.getElementById('chartTop'),{type:'bar',data:{labels:sorted.map(s=>s[0]),datasets:[{data:sorted.map(s=>s[1]),backgroundColor:'#f97316',borderRadius:6}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8'},grid:{color:'#334155'}},y:{ticks:{color:'#94a3b8'},grid:{display:false}}}}});
-}
-function updateQuestions(){
-  const qMap={};
-  allRecords.forEach(r=>{
-    if(r.questions_frequentes){
-      r.questions_frequentes.split('\n').forEach(q=>{
-        q=q.trim();
-        if(q)qMap[q]=(qMap[q]||0)+1;
-      });
+
+function parseMenu(txt){
+  if(!txt)return[];
+  const lines=txt.split('\n');
+  let cat='AUTRE';
+  const items=[];
+  for(const line of lines){
+    const l=line.trim();
+    if(!l)continue;
+    const catMatch=l.match(/^\[(.+)\]$/);
+    if(catMatch){cat=catMatch[1];continue;}
+    const parts=l.split(' \u2014 ');
+    const name=parts[0]||l;
+    let price='';let desc='';
+    if(parts.length>=2){
+      const pm=parts[1].match(/([\d,.]+)/);
+      price=pm?pm[1].replace(',','.'):'';
+      desc=parts.slice(2).join(' \u2014 ');
     }
+    items.push({cat,name:name.trim(),price,desc});
+  }
+  return items;
+}
+
+function buildMenu(items){
+  const cats={};
+  items.forEach(it=>{if(!cats[it.cat])cats[it.cat]=[];cats[it.cat].push(it);});
+  let txt='';
+  for(const[cat,list]of Object.entries(cats)){
+    txt+='['+cat+']\n';
+    list.forEach(it=>{
+      let line=it.name;
+      if(it.price)line+=' \u2014 '+it.price.toString().replace('.',',')+'\u20ac';
+      if(it.desc)line+=' \u2014 '+it.desc;
+      txt+=line+'\n';
+    });
+    txt+='\n';
+  }
+  return txt.trim();
+}
+
+function parseQuestions(txt){
+  if(!txt)return[];
+  return txt.split('\n').map(l=>l.trim()).filter(l=>l);
+}
+
+function buildQuestions(arr){return arr.join('\n');}
+
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+async function apiPost(action,data){
+  const body={resto_id:restoId,action,...data};
+  const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+function render(){
+  const d=DATA;
+  const activeDate=d.date_contact?new Date(d.date_contact).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'';
+  const isActive=d.commande_active;
+  const times=['10 min','15 min','15-20 min','20 min','25 min','30 min'];
+  const curTime=d.temps_preparation||'15-20 min';
+  let html='<div class="dashboard-header">';
+  if(d.logo_url)html+='<img src="'+d.logo_url+'" alt="">';
+  html+='<div class="header-info"><h1>'+esc(d.nom)+'</h1><p>'+esc(d.ville||'');
+  if(isActive)html+=' &middot; <span class="status-badge status-active">Actif</span>';
+  if(activeDate)html+=' depuis le '+activeDate;
+  html+='</p></div></div>';
+  html+='<div class="section"><div class="section-title">Temps de preparation</div><div class="time-selector">';
+  times.forEach(t=>{html+='<button class="time-btn'+(t===curTime?' active':'')+'" onclick="setTime(\''+t+'\')">'+t+'</button>';});
+  html+='</div></div>';
+  html+='<div class="section"><div class="section-title">Menu</div>';
+  const cats={};menuData.forEach((it,i)=>{if(!cats[it.cat])cats[it.cat]=[];cats[it.cat].push({...it,idx:i});});
+  for(const[cat,list]of Object.entries(cats)){
+    html+='<div class="cat-header">['+esc(cat)+']</div>';
+    list.forEach(it=>{
+      html+='<div class="menu-item"><div class="menu-item-info"><div class="menu-item-name">'+esc(it.name)+'</div>';
+      if(it.desc)html+='<div class="menu-item-desc">'+esc(it.desc)+'</div>';
+      html+='</div>';
+      if(it.price)html+='<div class="menu-item-price">'+esc(it.price.toString().replace('.',','))+'\u20ac</div>';
+      html+='<div class="item-actions"><button class="btn-sm" onclick="editItem('+it.idx+')">Modifier</button><button class="btn-sm danger" onclick="deleteItem('+it.idx+')">X</button></div></div>';
+    });
+  }
+  html+='<div style="margin-top:12px"><button class="btn" onclick="openAddModal()">+ Ajouter un plat</button></div></div>';
+  html+='<div class="section"><div class="section-title">Questions de commande</div>';
+  questionsData.forEach((q,i)=>{
+    html+='<div class="q-item"><span>'+esc(q)+'</span><div class="item-actions"><button class="btn-sm" onclick="editQ('+i+')">Modifier</button><button class="btn-sm danger" onclick="deleteQ('+i+')">X</button></div></div>';
   });
-  const sorted=Object.entries(qMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
-  const el=document.getElementById('questionsList');
-  if(sorted.length===0){el.innerHTML='<div style="color:#64748b;padding:20px;text-align:center">Aucune question enregistree</div>';return;}
-  el.innerHTML=sorted.map(([q,c])=>'<div class="question-item"><span class="q">'+q+'</span><span class="count">'+c+'</span></div>').join('');
+  html+='<div style="margin-top:12px"><button class="btn" onclick="openQModal()">+ Ajouter une question</button></div></div>';
+  html+='<div class="section"><div class="section-title">Commandes du jour ('+d.commandes_count+')</div>';
+  if(d.commandes.length===0)html+='<p style="color:#aaa;font-size:14px">Aucune commande aujourd\'hui</p>';
+  d.commandes.forEach(c=>{
+    const dt=c.date_commande?new Date(c.date_commande).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+    html+='<div class="order-item"><div class="order-left"><span class="order-num">#'+(c.numero_commande||c.commande_id)+'</span><span>'+esc(c.nom_client||'Client')+'</span></div><div class="order-right"><div>'+(c.total?c.total.toFixed(2).replace('.',',')+' \u20ac':'')+'</div><div>'+(c.type_service||'')+'</div><div>'+dt+'</div></div></div>';
+  });
+  html+='</div>';
+  const chatUrl='https://chat.iabot.live/chat/?resto='+restoId;
+  const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(chatUrl);
+  html+='<div class="section link-section"><div class="section-title">Votre chatbot</div><a href="'+chatUrl+'" target="_blank">'+chatUrl+'</a><div class="qr-container"><img src="'+qrUrl+'" alt="QR Code"><br><a href="'+qrUrl+'" download="qrcode-'+restoId+'.png" style="display:inline-block;margin-top:10px" class="btn">Telecharger le QR code</a></div></div>';
+  document.getElementById('app').className='';
+  document.getElementById('app').innerHTML=html;
 }
-function updateArgument(){
-  const conv=allRecords.reduce((s,r)=>s+(r.nb_conversations||0),0);
-  const res=allRecords.reduce((s,r)=>s+(r.nb_reservations||0),0);
-  const el=document.getElementById('argument');
-  const txt=document.getElementById('argText');
-  if(conv>0){
-    el.style.display='block';
-    txt.textContent=conv+' conversations, '+res+' reservations ce mois-ci';
-  }else{el.style.display='none';}
+
+async function setTime(t){
+  showToast('Mise a jour...');
+  await apiPost('update_temps',{temps_preparation:t});
+  DATA.temps_preparation=t;
+  render();
+  showToast('Temps mis a jour');
 }
-loadRestaurants();
-if(TOKEN)loadData();
-else document.getElementById('statsGrid').innerHTML='<div class="error">Ajoutez ?token=VOTRE_TOKEN_AIRTABLE dans l\'URL pour charger les donnees.</div>';
+
+function openAddModal(){editIdx=-1;document.getElementById('modalTitle').textContent='Ajouter un plat';document.getElementById('modalCat').value='BURGERS';document.getElementById('modalName').value='';document.getElementById('modalPrice').value='';document.getElementById('modalDesc').value='';document.getElementById('addModal').classList.add('show');}
+function editItem(i){editIdx=i;const it=menuData[i];document.getElementById('modalTitle').textContent='Modifier le plat';document.getElementById('modalCat').value=it.cat;document.getElementById('modalName').value=it.name;document.getElementById('modalPrice').value=it.price;document.getElementById('modalDesc').value=it.desc||'';document.getElementById('addModal').classList.add('show');}
+function closeModal(){document.getElementById('addModal').classList.remove('show');}
+
+async function saveItem(){
+  const cat=document.getElementById('modalCat').value;
+  const name=document.getElementById('modalName').value.trim();
+  const price=document.getElementById('modalPrice').value;
+  const desc=document.getElementById('modalDesc').value.trim();
+  if(!name){showToast('Nom requis');return;}
+  if(editIdx>=0){menuData[editIdx]={cat,name,price,desc};}
+  else{menuData.push({cat,name,price,desc});}
+  closeModal();
+  showToast('Sauvegarde...');
+  await apiPost('update_menu',{menu:buildMenu(menuData)});
+  render();
+  showToast('Menu mis a jour');
+}
+
+async function deleteItem(i){
+  if(!confirm('Supprimer '+menuData[i].name+' ?'))return;
+  menuData.splice(i,1);
+  showToast('Suppression...');
+  await apiPost('update_menu',{menu:buildMenu(menuData)});
+  render();
+  showToast('Plat supprime');
+}
+
+function openQModal(){editQIdx=-1;document.getElementById('qModalTitle').textContent='Ajouter une question';document.getElementById('qModalText').value='';document.getElementById('qModal').classList.add('show');}
+function editQ(i){editQIdx=i;document.getElementById('qModalTitle').textContent='Modifier la question';document.getElementById('qModalText').value=questionsData[i];document.getElementById('qModal').classList.add('show');}
+function closeQModal(){document.getElementById('qModal').classList.remove('show');}
+
+async function saveQuestion(){
+  const txt=document.getElementById('qModalText').value.trim();
+  if(!txt){showToast('Question requise');return;}
+  if(editQIdx>=0){questionsData[editQIdx]=txt;}
+  else{questionsData.push(txt);}
+  closeQModal();
+  showToast('Sauvegarde...');
+  await apiPost('update_questions',{questions_commande:buildQuestions(questionsData)});
+  render();
+  showToast('Questions mises a jour');
+}
+
+async function deleteQ(i){
+  if(!confirm('Supprimer cette question ?'))return;
+  questionsData.splice(i,1);
+  showToast('Suppression...');
+  await apiPost('update_questions',{questions_commande:buildQuestions(questionsData)});
+  render();
+  showToast('Question supprimee');
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('show'),2000);}
 </script>
 </body>
 </html>
