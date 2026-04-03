@@ -1,8 +1,294 @@
 <!DOCTYPE html>
-  <html>
-  <head>
-  <meta charset="UTF-8">
-  <script>window.location.href='/chat/'+window.location.search;</script>
-  </head>
-  <body></body>
-  </html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAbot — L’assistant IA pour restaurants halal</title>
+<meta name="description" content="Vos clients commandent depuis leur téléphone. Vous recevez les commandes sur Telegram. Moins de file. Moins d’erreurs. Plus de commandes.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;background:#0a0a0a;color:#fff;line-height:1.6;overflow-x:hidden}
+a{color:#FF3B3B;text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:1100px;margin:0 auto;padding:0 20px}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 20px 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(255,59,59,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(255,59,59,.05) 0%,transparent 50%);z-index:0}
+.hero-content{position:relative;z-index:1;max-width:700px}
+.hero-logo{font-size:2.5rem;font-weight:800;margin-bottom:8px;letter-spacing:-1px}
+.hero-logo span{color:#FF3B3B}
+.hero h1{font-size:clamp(1.5rem,4vw,2.4rem);font-weight:700;margin-bottom:16px;line-height:1.3;opacity:0;animation:fadeUp .8s ease forwards}
+.hero p{font-size:clamp(1rem,2.5vw,1.15rem);color:#aaa;margin-bottom:36px;line-height:1.7;opacity:0;animation:fadeUp .8s ease .2s forwards}
+.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp .8s ease .4s forwards}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 32px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;border:none;transition:transform .2s,box-shadow .2s;min-height:48px;text-decoration:none}
+.btn-primary{background:#FF3B3B;color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,59,59,.3);text-decoration:none}
+.btn-secondary{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.btn-secondary:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);text-decoration:none}
+
+/* SECTIONS */
+section{padding:80px 20px}
+.section-title{text-align:center;font-size:clamp(1.4rem,3.5vw,2rem);font-weight:700;margin-bottom:50px}
+
+/* COMMENT CA MARCHE */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;max-width:1000px;margin:0 auto}
+.step{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:36px 28px;text-align:center}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:#FF3B3B;border-radius:50%;font-weight:700;font-size:.95rem;margin-bottom:16px}
+.step-icon{margin-bottom:16px}
+.step-icon svg{width:48px;height:48px;stroke:#FF3B3B;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.step h3{font-size:1.1rem;margin-bottom:10px;font-weight:600}
+.step p{color:#aaa;font-size:.95rem;line-height:1.6}
+
+/* AVANTAGES */
+.advantages{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1000px;margin:0 auto}
+.advantage{display:flex;gap:14px;align-items:flex-start;padding:20px;border-radius:12px;transition:background .2s}
+.advantage:hover{background:rgba(255,255,255,.03)}
+.advantage-check{flex-shrink:0;width:24px;height:24px;background:#FF3B3B;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.advantage-check svg{width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none}
+.advantage h4{font-size:1rem;font-weight:600;margin-bottom:4px}
+.advantage p{color:#aaa;font-size:.9rem;line-height:1.5}
+
+/* TARIF */
+.pricing-wrap{display:flex;justify-content:center}
+.pricing-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,59,59,.25);border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 0 60px rgba(255,59,59,.08)}
+.pricing-price{font-size:3rem;font-weight:800;margin-bottom:4px}
+.pricing-price span{font-size:1.2rem;font-weight:400;color:#aaa}
+.pricing-old{color:#888;font-size:1rem;text-decoration:line-through;margin-bottom:24px}
+.pricing-features{list-style:none;text-align:left;margin:24px 0 32px}
+.pricing-features li{padding:8px 0;font-size:.95rem;display:flex;align-items:center;gap:10px;color:#ccc}
+.pricing-features li svg{width:18px;height:18px;stroke:#FF3B3B;fill:none;flex-shrink:0}
+.pricing-offer{background:rgba(255,59,59,.12);border:1px solid rgba(255,59,59,.3);border-radius:10px;padding:12px;margin-bottom:28px;font-weight:700;font-size:1.05rem;color:#FF3B3B}
+.pricing-note{color:#888;font-size:.85rem;margin-top:16px}
+
+/* FAQ */
+.faq-list{max-width:700px;margin:0 auto}
+.faq-item{border-bottom:1px solid rgba(255,255,255,.08);overflow:hidden}
+.faq-q{padding:20px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1rem;user-select:none}
+.faq-q::after{content:'+';font-size:1.4rem;color:#FF3B3B;transition:transform .3s}
+.faq-item.open .faq-q::after{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;color:#aaa;font-size:.95rem;line-height:1.6}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:20px}
+
+/* CONTACT */
+.contact-section{background:rgba(255,255,255,.02)}
+.contact-form{max-width:500px;margin:0 auto}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:.9rem;color:#aaa;margin-bottom:6px;font-weight:500}
+.form-group input{width:100%;padding:14px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;font-size:1rem;outline:none;transition:border-color .2s}
+.form-group input:focus{border-color:#FF3B3B}
+.form-group input::placeholder{color:#555}
+.form-success{display:none;text-align:center;padding:40px 20px}
+.form-success h3{color:#FF3B3B;font-size:1.3rem;margin-bottom:8px}
+.form-success p{color:#aaa}
+.contact-email{text-align:center;margin-top:24px;color:#888;font-size:.9rem}
+
+/* FOOTER */
+footer{border-top:1px solid rgba(255,255,255,.06);padding:32px 20px;text-align:center}
+footer p{color:#666;font-size:.85rem;line-height:1.8}
+footer a{color:#888}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .6s ease,transform .6s ease}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+
+/* MOBILE */
+@media(max-width:640px){
+  section{padding:60px 16px}
+  .pricing-card{padding:36px 24px}
+  .hero{padding:60px 16px 40px}
+  .btn{padding:14px 24px;width:100%}
+  .hero-btns{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero" id="top">
+<div class="hero-content">
+  <div class="hero-logo">IA<span>bot</span></div>
+  <h1>Votre assistant IA qui prend les commandes à votre place.</h1>
+  <p>Vos clients commandent depuis leur téléphone. Vous recevez les commandes sur Telegram.<br>Moins de file. Moins d’erreurs. Plus de commandes.</p>
+  <div class="hero-btns">
+    <a href="#contact" class="btn btn-primary">Essayer gratuitement</a>
+    <a href="https://chat.iabot.live/chat/?resto=delims-burger" target="_blank" rel="noopener" class="btn btn-secondary">Voir la démo</a>
+  </div>
+</div>
+</section>
+
+<!-- COMMENT CA MARCHE -->
+<section id="steps">
+<div class="container">
+  <h2 class="section-title reveal">Comment ça marche</h2>
+  <div class="steps">
+    <div class="step reveal-left" style="transition-delay:.1s">
+      <div class="step-num">1</div>
+      <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <h3>Le client scanne le QR code</h3>
+      <p>Sur votre comptoir, votre table, ou votre vitrine. Le client ouvre le chatbot depuis son téléphone.</p>
+    </div>
+    <div class="step reveal-left" style="transition-delay:.25s">
+      <div class="step-num">2</div>
+      <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+      <h3>Il commande en 30 secondes</h3>
+      <p>L’assistant IA guide le client : menu, options, modifications, récap. Tout est automatique.</p>
+    </div>
+    <div class="step reveal-left" style="transition-delay:.4s">
+      <div class="step-num">3</div>
+      <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+      <h3>Vous recevez la commande</h3>
+      <p>La commande arrive sur votre Telegram, formatée et prête à préparer. Nom, plats, total, service.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- AVANTAGES -->
+<section id="advantages">
+<div class="container">
+  <h2 class="section-title reveal">Pourquoi les restaurants halal choisissent IAbot</h2>
+  <div class="advantages">
+    <div class="advantage reveal">
+      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><h4>Moins de file d’attente</h4><p>Vos clients commandent avant d’arriver ou en attendant.</p></div>
+    </div>
+    <div class="advantage reveal">
+      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><h4>Zéro erreur de commande</h4><p>L’IA confirme chaque détail : sauce, garniture, cuisson.</p></div>
+    </div>
+    <div class="advantage reveal">
+      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><h4>Plus de commandes</h4><p>Disponible 24h/24. Le client commande même quand vous êtes fermé.</p></div>
+    </div>
+    <div class="advantage reveal">
+      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><h4>Menu 100% personnalisable</h4><p>Vos plats, vos prix, vos questions. Modifiable à tout moment.</p></div>
+    </div>
+    <div class="advantage reveal">
+      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><h4>Installation en 5 minutes</h4><p>On s’occupe de tout. Vous avez juste à installer Telegram.</p></div>
+    </div>
+    <div class="advantage reveal">
+      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div><h4>Certifié halal</h4><p>Conçu pour les restaurants halal. Aucun compromis.</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- TARIF -->
+<section id="pricing">
+<div class="container">
+  <h2 class="section-title reveal">Un seul tarif. Simple.</h2>
+  <div class="pricing-wrap">
+    <div class="pricing-card reveal">
+      <div class="pricing-price">249€<span>/mois</span></div>
+      <div class="pricing-old">au lieu de 359€</div>
+      <ul class="pricing-features">
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Chatbot IA intelligent</li>
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Commandes automatiques</li>
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Réception sur Telegram</li>
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>QR code personnalisé</li>
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Dashboard restaurant</li>
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Menu modifiable en temps réel</li>
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Support inclus</li>
+        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Sans engagement</li>
+      </ul>
+      <div class="pricing-offer">Premier mois OFFERT</div>
+      <a href="#contact" class="btn btn-primary" style="width:100%">Essayer gratuitement</a>
+      <p class="pricing-note">Offre de lancement — places limitées</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+<div class="container">
+  <h2 class="section-title reveal">Questions fréquentes</h2>
+  <div class="faq-list">
+    <div class="faq-item"><div class="faq-q">C’est quoi exactement ?</div><div class="faq-a">Un assistant IA qui prend les commandes de vos clients depuis leur téléphone. Le client scanne un QR code, commande, et vous recevez la commande sur Telegram.</div></div>
+    <div class="faq-item"><div class="faq-q">C’est halal ?</div><div class="faq-a">Oui. IAbot est conçu pour les restaurants halal. Aucun compromis sur les valeurs.</div></div>
+    <div class="faq-item"><div class="faq-q">Ça prend combien de temps à installer ?</div><div class="faq-a">5 minutes. On s’occupe de tout. Vous avez juste à installer Telegram (gratuit).</div></div>
+    <div class="faq-item"><div class="faq-q">Je peux modifier mon menu ?</div><div class="faq-a">Oui. Depuis votre dashboard, vous ajoutez, modifiez ou supprimez des plats en 2 clics.</div></div>
+    <div class="faq-item"><div class="faq-q">Et si je veux arrêter ?</div><div class="faq-a">Pas d’engagement. Vous arrêtez quand vous voulez.</div></div>
+    <div class="faq-item"><div class="faq-q">Comment les clients commandent ?</div><div class="faq-a">Ils scannent le QR code sur votre comptoir. Le chatbot s’ouvre sur leur téléphone. Ils commandent en discutant avec l’assistant.</div></div>
+    <div class="faq-item"><div class="faq-q">Je reçois les commandes où ?</div><div class="faq-a">Sur Telegram. Chaque commande arrive avec le nom, les plats, le total, et le type de service (sur place ou à emporter).</div></div>
+  </div>
+</div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact-section" id="contact">
+<div class="container">
+  <h2 class="section-title reveal">Essayez gratuitement</h2>
+  <div class="contact-form" id="contactForm">
+    <div class="form-group"><label>Nom du restaurant</label><input type="text" id="f-name" placeholder="Ex : Biggy Burger" required></div>
+    <div class="form-group"><label>Ville</label><input type="text" id="f-city" placeholder="Ex : Paris" required></div>
+    <div class="form-group"><label>Téléphone</label><input type="tel" id="f-phone" placeholder="06 12 34 56 78" required></div>
+    <div class="form-group"><label>Email (optionnel)</label><input type="email" id="f-email" placeholder="contact@monrestaurant.fr"></div>
+    <button type="button" class="btn btn-primary" style="width:100%" id="submitBtn" onclick="submitForm()">Démarrer mon essai gratuit</button>
+  </div>
+  <div class="form-success" id="formSuccess">
+    <h3>Merci !</h3>
+    <p>On vous contacte dans les 24h.</p>
+  </div>
+  <p class="contact-email">Ou écrivez-nous : <a href="mailto:iabot1019@gmail.com">iabot1019@gmail.com</a></p>
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+<div class="container">
+  <p><strong>IAbot</strong> — L’assistant IA pour restaurants halal</p>
+  <p>© 2026 IAbot. Tous droits réservés. — <a href="mailto:iabot1019@gmail.com">iabot1019@gmail.com</a></p>
+</div>
+</footer>
+
+<script>
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+}, {threshold: 0.15});
+document.querySelectorAll('.reveal, .reveal-left').forEach(el => obs.observe(el));
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    if(!wasOpen) item.classList.add('open');
+  });
+});
+
+// Form submit
+function submitForm(){
+  const name = document.getElementById('f-name').value.trim();
+  const city = document.getElementById('f-city').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  if(!name || !city || !phone){ alert('Veuillez remplir les champs obligatoires.'); return; }
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Envoi en cours...';
+  btn.disabled = true;
+  fetch('https://dziab.app.n8n.cloud/webhook/contact-vitrine', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({restaurant:name, ville:city, telephone:phone, email:email})
+  }).then(()=>{
+    document.getElementById('contactForm').style.display='none';
+    document.getElementById('formSuccess').style.display='block';
+  }).catch(()=>{
+    document.getElementById('contactForm').style.display='none';
+    document.getElementById('formSuccess').style.display='block';
+  });
+}
+</script>
+</body>
+</html>
