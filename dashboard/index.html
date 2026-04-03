@@ -55,6 +55,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cp)}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:200;display:none;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 .toast.show{display:block;animation:fadeInUp .3s}
 @keyframes fadeInUp{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.new-cat-row{display:flex;gap:8px;margin-top:8px;display:none}
+.new-cat-row.show{display:flex}
 </style>
 </head>
 <body>
@@ -62,7 +64,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cp)}
 <div id="addModal" class="modal-overlay">
 <div class="modal">
 <h3 id="modalTitle">Ajouter un plat</h3>
-<div class="form-group"><label>Categorie</label><select id="modalCat"><option>BURGERS</option><option>MENUS</option><option>TACOS</option><option>BOISSONS</option><option>DESSERTS</option><option>ACCOMPAGNEMENTS</option><option>AUTRE</option></select></div>
+<div class="form-group"><label>Categorie</label><select id="modalCat" onchange="toggleNewCat()"></select><div id="newCatRow" class="new-cat-row"><input id="newCatInput" placeholder="Nom de la categorie"><button class="btn-sm" onclick="confirmNewCat()" style="white-space:nowrap">OK</button></div></div>
 <div class="form-group"><label>Nom</label><input id="modalName" placeholder="Ex: Double Cheese"></div>
 <div class="form-group"><label>Prix</label><input id="modalPrice" type="number" step="0.5" placeholder="8.50"></div>
 <div class="form-group"><label>Description (optionnel)</label><input id="modalDesc" placeholder="Ex: Steak, cheddar, salade..."></div>
@@ -91,154 +93,148 @@ if(!restoId){document.getElementById('app').innerHTML='<p style="color:#ff4444;t
 else{loadData();}
 
 async function loadData(){
-  try{
-    const r=await fetch(WEBHOOK_URL+'?resto='+restoId);
-    DATA=await r.json();
-    if(DATA.error){document.getElementById('app').innerHTML='<p style="color:#ff4444;text-align:center;padding:40px">'+DATA.error+'</p>';return;}
-    document.documentElement.style.setProperty('--cp',DATA.couleur_principale);
-    document.documentElement.style.setProperty('--cs',DATA.couleur_secondaire);
-    menuData=parseMenu(DATA.menu);
-    questionsData=parseQuestions(DATA.questions_commande);
-    render();
-  }catch(e){document.getElementById('app').innerHTML='<p style="color:#ff4444;text-align:center;padding:40px">Erreur de chargement</p>';}
+try{
+const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'load',resto_id:restoId})});
+DATA=await r.json();
+if(DATA.error){document.getElementById('app').innerHTML='<p style="color:#ff4444;text-align:center;padding:40px">'+DATA.error+'</p>';return;}
+document.documentElement.style.setProperty('--cp',DATA.couleur_principale||'#D32F2F');
+document.documentElement.style.setProperty('--cs',DATA.couleur_secondaire||'#FFC107');
+menuData=parseMenu(DATA.menu);
+questionsData=parseQuestions(DATA.questions_commande);
+render();
+}catch(e){document.getElementById('app').innerHTML='<p style="color:#ff4444;text-align:center;padding:40px">Erreur de chargement</p>';}
 }
 
 function parseMenu(txt){
-  if(!txt)return[];
-  const lines=txt.split('\n');
-  let cat='AUTRE';
-  const items=[];
-  for(const line of lines){
-    const l=line.trim();
-    if(!l)continue;
-    const catMatch=l.match(/^\[(.+)\]$/);
-    if(catMatch){cat=catMatch[1];continue;}
-    const parts=l.split(' \u2014 ');
-    const name=parts[0]||l;
-    let price='';let desc='';
-    if(parts.length>=2){
-      const pm=parts[1].match(/([\d,.]+)/);
-      price=pm?pm[1].replace(',','.'):'';
-      desc=parts.slice(2).join(' \u2014 ');
-    }
-    items.push({cat,name:name.trim(),price,desc});
-  }
-  return items;
+if(!txt)return[];
+const lines=txt.split('\n');let cat='AUTRE';const items=[];
+for(const line of lines){const l=line.trim();if(!l)continue;
+const catMatch=l.match(/^\[(.+)\]$/);
+if(catMatch){cat=catMatch[1];continue;}
+const parts=l.split(' \u2014 ');const name=parts[0]||l;let price='';let desc='';
+if(parts.length>=2){const pm=parts[1].match(/([\d,.]+)/);price=pm?pm[1].replace(',','.'):'';desc=parts.slice(2).join(' \u2014 ');}
+items.push({cat,name:name.trim(),price,desc});
+}return items;
 }
 
 function buildMenu(items){
-  const cats={};
-  items.forEach(it=>{if(!cats[it.cat])cats[it.cat]=[];cats[it.cat].push(it);});
-  let txt='';
-  for(const[cat,list]of Object.entries(cats)){
-    txt+='['+cat+']\n';
-    list.forEach(it=>{
-      let line=it.name;
-      if(it.price)line+=' \u2014 '+it.price.toString().replace('.',',')+'\u20ac';
-      if(it.desc)line+=' \u2014 '+it.desc;
-      txt+=line+'\n';
-    });
-    txt+='\n';
-  }
-  return txt.trim();
+const cats={};items.forEach(it=>{if(!cats[it.cat])cats[it.cat]=[];cats[it.cat].push(it);});
+let txt='';for(const[cat,list]of Object.entries(cats)){
+txt+='['+cat+']\n';
+list.forEach(it=>{let line=it.name;if(it.price)line+=' \u2014 '+it.price.toString().replace('.',',')+' \u20ac';if(it.desc)line+=' \u2014 '+it.desc;txt+=line+'\n';});
+txt+='\n';}return txt.trim();
 }
 
-function parseQuestions(txt){
-  if(!txt)return[];
-  return txt.split('\n').map(l=>l.trim()).filter(l=>l);
-}
-
+function parseQuestions(txt){if(!txt)return[];return txt.split('\n').map(l=>l.trim()).filter(l=>l);}
 function buildQuestions(arr){return arr.join('\n');}
-
 function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 async function apiPost(action,data){
-  const body={resto_id:restoId,action,...data};
-  const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  return r.json();
+const body={resto_id:restoId,record_id:DATA.record_id,action,...data};
+const r=await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+return r.json();
 }
 
+function getCategories(){const cats=[...new Set(menuData.map(it=>it.cat))];if(cats.length===0)cats.push('BURGERS','MENUS','BOISSONS');return cats;}
+
 function render(){
-  const d=DATA;
-  const activeDate=d.date_contact?new Date(d.date_contact).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'';
-  const isActive=d.commande_active;
-  const times=['10 min','15 min','15-20 min','20 min','25 min','30 min'];
-  const curTime=d.temps_preparation||'15-20 min';
-  let html='<div class="dashboard-header">';
-  if(d.logo_url)html+='<img src="'+d.logo_url+'" alt="">';
-  html+='<div class="header-info"><h1>'+esc(d.nom)+'</h1><p>'+esc(d.ville||'');
-  if(isActive)html+=' &middot; <span class="status-badge status-active">Actif</span>';
-  if(activeDate)html+=' depuis le '+activeDate;
-  html+='</p></div></div>';
-  html+='<div class="section"><div class="section-title">Temps de preparation</div><div class="time-selector">';
-  times.forEach(t=>{html+='<button class="time-btn'+(t===curTime?' active':'')+'" onclick="setTime(\''+t+'\')">'+t+'</button>';});
-  html+='</div></div>';
-  html+='<div class="section"><div class="section-title">Menu</div>';
-  const cats={};menuData.forEach((it,i)=>{if(!cats[it.cat])cats[it.cat]=[];cats[it.cat].push({...it,idx:i});});
-  for(const[cat,list]of Object.entries(cats)){
-    html+='<div class="cat-header">['+esc(cat)+']</div>';
-    list.forEach(it=>{
-      html+='<div class="menu-item"><div class="menu-item-info"><div class="menu-item-name">'+esc(it.name)+'</div>';
-      if(it.desc)html+='<div class="menu-item-desc">'+esc(it.desc)+'</div>';
-      html+='</div>';
-      if(it.price)html+='<div class="menu-item-price">'+esc(it.price.toString().replace('.',','))+'\u20ac</div>';
-      html+='<div class="item-actions"><button class="btn-sm" onclick="editItem('+it.idx+')">Modifier</button><button class="btn-sm danger" onclick="deleteItem('+it.idx+')">X</button></div></div>';
-    });
-  }
-  html+='<div style="margin-top:12px"><button class="btn" onclick="openAddModal()">+ Ajouter un plat</button></div></div>';
-  html+='<div class="section"><div class="section-title">Questions de commande</div>';
-  questionsData.forEach((q,i)=>{
-    html+='<div class="q-item"><span>'+esc(q)+'</span><div class="item-actions"><button class="btn-sm" onclick="editQ('+i+')">Modifier</button><button class="btn-sm danger" onclick="deleteQ('+i+')">X</button></div></div>';
-  });
-  html+='<div style="margin-top:12px"><button class="btn" onclick="openQModal()">+ Ajouter une question</button></div></div>';
-  html+='<div class="section"><div class="section-title">Commandes du jour ('+d.commandes_count+')</div>';
-  if(d.commandes.length===0)html+='<p style="color:#aaa;font-size:14px">Aucune commande aujourd\'hui</p>';
-  d.commandes.forEach(c=>{
-    const dt=c.date_commande?new Date(c.date_commande).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
-    html+='<div class="order-item"><div class="order-left"><span class="order-num">#'+(c.numero_commande||c.commande_id)+'</span><span>'+esc(c.nom_client||'Client')+'</span></div><div class="order-right"><div>'+(c.total?c.total.toFixed(2).replace('.',',')+' \u20ac':'')+'</div><div>'+(c.type_service||'')+'</div><div>'+dt+'</div></div></div>';
-  });
-  html+='</div>';
-  const chatUrl='https://chat.iabot.live/chat/?resto='+restoId;
-  const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(chatUrl);
-  html+='<div class="section link-section"><div class="section-title">Votre chatbot</div><a href="'+chatUrl+'" target="_blank">'+chatUrl+'</a><div class="qr-container"><img src="'+qrUrl+'" alt="QR Code"><br><a href="'+qrUrl+'" download="qrcode-'+restoId+'.png" style="display:inline-block;margin-top:10px" class="btn">Telecharger le QR code</a></div></div>';
-  document.getElementById('app').className='';
-  document.getElementById('app').innerHTML=html;
+const d=DATA;
+const activeDate=d.date_creation?new Date(d.date_creation).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'';
+const times=['10 min','15 min','15-20 min','20 min','25 min','30 min'];
+const curTime=d.temps_preparation||'15-20 min';
+let html='<div class="dashboard-header">';
+if(d.logo_url)html+='<img src="'+d.logo_url+'" alt="">';
+html+='<div class="header-info"><h1>'+esc(d.nom)+'</h1><p>'+esc(d.ville||'');
+if(d.statut==='actif')html+=' &middot; <span class="status-badge status-active">Actif</span>';
+if(activeDate)html+=' depuis le '+activeDate;
+html+='</p></div></div>';
+
+html+='<div class="section"><div class="section-title">Temps de preparation</div><div class="time-selector">';
+times.forEach(t=>{html+='<button class="time-btn'+(t===curTime?' active':'')+'" onclick="setTime(\''+t+'\')">'+t+'</button>';});
+html+='</div></div>';
+
+html+='<div class="section"><div class="section-title">Menu ('+menuData.length+' plats)</div>';
+const cats={};menuData.forEach((it,i)=>{if(!cats[it.cat])cats[it.cat]=[];cats[it.cat].push({...it,idx:i});});
+for(const[cat,list]of Object.entries(cats)){
+html+='<div class="cat-header">['+esc(cat)+']</div>';
+list.forEach(it=>{
+html+='<div class="menu-item"><div class="menu-item-info"><div class="menu-item-name">'+esc(it.name)+'</div>';
+if(it.desc)html+='<div class="menu-item-desc">'+esc(it.desc)+'</div>';
+html+='</div>';
+if(it.price)html+='<div class="menu-item-price">'+esc(it.price.toString().replace('.',','))+'\u20ac</div>';
+html+='<div class="item-actions"><button class="btn-sm" onclick="editItem('+it.idx+')">Modifier</button><button class="btn-sm danger" onclick="deleteItem('+it.idx+')">X</button></div></div>';
+});}
+html+='<div style="margin-top:12px"><button class="btn" onclick="openAddModal()">+ Ajouter un plat</button></div></div>';
+
+html+='<div class="section"><div class="section-title">Questions de commande ('+questionsData.length+')</div>';
+questionsData.forEach((q,i)=>{
+html+='<div class="q-item"><span>'+esc(q)+'</span><div class="item-actions"><button class="btn-sm" onclick="editQ('+i+')">Modifier</button><button class="btn-sm danger" onclick="deleteQ('+i+')">X</button></div></div>';
+});
+html+='<div style="margin-top:12px"><button class="btn" onclick="openQModal()">+ Ajouter une question</button></div></div>';
+
+html+='<div class="section"><div class="section-title">Commandes du jour ('+(d.commandes_count||0)+')</div>';
+if(!d.commandes||d.commandes.length===0)html+='<p style="color:#aaa;font-size:14px">Aucune commande aujourd\'hui</p>';
+else d.commandes.forEach(c=>{
+const dt=c.date_commande?new Date(c.date_commande).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+html+='<div class="order-item"><div class="order-left"><span class="order-num">#'+(c.numero_commande||c.commande_id||'')+'</span><span>'+esc(c.nom_client||'Client')+'</span></div><div class="order-right"><div>'+(c.total?parseFloat(c.total).toFixed(2).replace('.',',')+' \u20ac':'')+'</div><div>'+(c.type_service||'')+'</div><div>'+dt+'</div></div></div>';
+});
+html+='</div>';
+
+const chatUrl='https://chat.iabot.live/chat/?resto='+restoId;
+const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(chatUrl);
+html+='<div class="section link-section"><div class="section-title">Votre chatbot</div><a href="'+chatUrl+'" target="_blank">'+chatUrl+'</a><div class="qr-container"><img src="'+qrUrl+'" alt="QR Code"><br><a href="'+qrUrl+'" download="qrcode-'+restoId+'.png" style="display:inline-block;margin-top:10px" class="btn">Telecharger le QR code</a></div></div>';
+document.getElementById('app').className='';
+document.getElementById('app').innerHTML=html;
 }
 
 async function setTime(t){
-  showToast('Mise a jour...');
-  await apiPost('update_temps',{temps_preparation:t});
-  DATA.temps_preparation=t;
-  render();
-  showToast('Temps mis a jour');
+showToast('Mise a jour...');
+await apiPost('update_temps',{value:t});
+DATA.temps_preparation=t;render();showToast('Temps mis a jour');
 }
 
-function openAddModal(){editIdx=-1;document.getElementById('modalTitle').textContent='Ajouter un plat';document.getElementById('modalCat').value='BURGERS';document.getElementById('modalName').value='';document.getElementById('modalPrice').value='';document.getElementById('modalDesc').value='';document.getElementById('addModal').classList.add('show');}
-function editItem(i){editIdx=i;const it=menuData[i];document.getElementById('modalTitle').textContent='Modifier le plat';document.getElementById('modalCat').value=it.cat;document.getElementById('modalName').value=it.name;document.getElementById('modalPrice').value=it.price;document.getElementById('modalDesc').value=it.desc||'';document.getElementById('addModal').classList.add('show');}
+function populateCatSelect(selected){
+const sel=document.getElementById('modalCat');sel.innerHTML='';
+const cats=getCategories();
+cats.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+const newOpt=document.createElement('option');newOpt.value='__NEW__';newOpt.textContent='+ Nouvelle categorie';sel.appendChild(newOpt);
+if(selected&&cats.includes(selected))sel.value=selected;
+}
+
+function toggleNewCat(){
+const sel=document.getElementById('modalCat');
+const row=document.getElementById('newCatRow');
+if(sel.value==='__NEW__'){row.classList.add('show');}
+else{row.classList.remove('show');}
+}
+
+function confirmNewCat(){
+const input=document.getElementById('newCatInput');
+const val=input.value.trim().toUpperCase();
+if(!val){showToast('Nom requis');return;}
+const sel=document.getElementById('modalCat');
+const o=document.createElement('option');o.value=val;o.textContent=val;
+sel.insertBefore(o,sel.lastElementChild);sel.value=val;
+document.getElementById('newCatRow').classList.remove('show');input.value='';
+}
+
+function openAddModal(){editIdx=-1;document.getElementById('modalTitle').textContent='Ajouter un plat';populateCatSelect();document.getElementById('modalName').value='';document.getElementById('modalPrice').value='';document.getElementById('modalDesc').value='';document.getElementById('newCatRow').classList.remove('show');document.getElementById('addModal').classList.add('show');}
+function editItem(i){editIdx=i;const it=menuData[i];document.getElementById('modalTitle').textContent='Modifier le plat';populateCatSelect(it.cat);document.getElementById('modalName').value=it.name;document.getElementById('modalPrice').value=it.price;document.getElementById('modalDesc').value=it.desc||'';document.getElementById('newCatRow').classList.remove('show');document.getElementById('addModal').classList.add('show');}
 function closeModal(){document.getElementById('addModal').classList.remove('show');}
 
 async function saveItem(){
-  const cat=document.getElementById('modalCat').value;
-  const name=document.getElementById('modalName').value.trim();
-  const price=document.getElementById('modalPrice').value;
-  const desc=document.getElementById('modalDesc').value.trim();
-  if(!name){showToast('Nom requis');return;}
-  if(editIdx>=0){menuData[editIdx]={cat,name,price,desc};}
-  else{menuData.push({cat,name,price,desc});}
-  closeModal();
-  showToast('Sauvegarde...');
-  await apiPost('update_menu',{menu:buildMenu(menuData)});
-  render();
-  showToast('Menu mis a jour');
+const cat=document.getElementById('modalCat').value;const name=document.getElementById('modalName').value.trim();
+const price=document.getElementById('modalPrice').value;const desc=document.getElementById('modalDesc').value.trim();
+if(!name){showToast('Nom requis');return;}if(cat==='__NEW__'){showToast('Confirmez la categorie');return;}
+if(editIdx>=0){menuData[editIdx]={cat,name,price,desc};}else{menuData.push({cat,name,price,desc});}
+closeModal();showToast('Sauvegarde...');
+await apiPost('update_menu',{menu:buildMenu(menuData)});render();showToast('Menu mis a jour');
 }
 
 async function deleteItem(i){
-  if(!confirm('Supprimer '+menuData[i].name+' ?'))return;
-  menuData.splice(i,1);
-  showToast('Suppression...');
-  await apiPost('update_menu',{menu:buildMenu(menuData)});
-  render();
-  showToast('Plat supprime');
+if(!confirm('Supprimer '+menuData[i].name+' ?'))return;
+menuData.splice(i,1);showToast('Suppression...');
+await apiPost('update_menu',{menu:buildMenu(menuData)});render();showToast('Plat supprime');
 }
 
 function openQModal(){editQIdx=-1;document.getElementById('qModalTitle').textContent='Ajouter une question';document.getElementById('qModalText').value='';document.getElementById('qModal').classList.add('show');}
@@ -246,24 +242,17 @@ function editQ(i){editQIdx=i;document.getElementById('qModalTitle').textContent=
 function closeQModal(){document.getElementById('qModal').classList.remove('show');}
 
 async function saveQuestion(){
-  const txt=document.getElementById('qModalText').value.trim();
-  if(!txt){showToast('Question requise');return;}
-  if(editQIdx>=0){questionsData[editQIdx]=txt;}
-  else{questionsData.push(txt);}
-  closeQModal();
-  showToast('Sauvegarde...');
-  await apiPost('update_questions',{questions_commande:buildQuestions(questionsData)});
-  render();
-  showToast('Questions mises a jour');
+const txt=document.getElementById('qModalText').value.trim();
+if(!txt){showToast('Question requise');return;}
+if(editQIdx>=0){questionsData[editQIdx]=txt;}else{questionsData.push(txt);}
+closeQModal();showToast('Sauvegarde...');
+await apiPost('update_questions',{questions:buildQuestions(questionsData)});render();showToast('Questions mises a jour');
 }
 
 async function deleteQ(i){
-  if(!confirm('Supprimer cette question ?'))return;
-  questionsData.splice(i,1);
-  showToast('Suppression...');
-  await apiPost('update_questions',{questions_commande:buildQuestions(questionsData)});
-  render();
-  showToast('Question supprimee');
+if(!confirm('Supprimer cette question ?'))return;
+questionsData.splice(i,1);showToast('Suppression...');
+await apiPost('update_questions',{questions:buildQuestions(questionsData)});render();showToast('Question supprimee');
 }
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._to);t._to=setTimeout(()=>t.classList.remove('show'),2000);}
