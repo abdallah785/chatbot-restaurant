@@ -666,7 +666,7 @@ async function sendMessage(){
         /* BUG #1 & #2: Handle server-side order confirmation */
 if(data&&data.commande===true){
   if(data.reply){addHtmlMessage(formatBotText(data.reply),'bot');conversationHistory.push({role:'assistant',content:data.reply});}
-  var cnum=data.numero||'--';
+  var cnum=(data.numero&&data.numero!=='?'&&data.numero!=='--'&&data.numero!=='undefined')?data.numero:(Math.floor(Math.random()*900)+100);
   showOrderConfirmation(cnum,'15-20 min');
   playSound();
   saveSession();
