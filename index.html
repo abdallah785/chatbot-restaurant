@@ -9,101 +9,109 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;background:#0a0a0a;color:#fff;line-height:1.6;overflow-x:hidden}
-a{color:#FF3B3B;text-decoration:none}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;background:#0a0a0a;color:#fff;line-height:1.7;overflow-x:hidden}
+a{color:#00C9A7;text-decoration:none}
 a:hover{text-decoration:underline}
-.container{max-width:1100px;margin:0 auto;padding:0 20px}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
 
 /* HERO */
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 20px 60px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(255,59,59,.08) 0%,transparent 60%),radial-gradient(ellipse at 70% 30%,rgba(255,59,59,.05) 0%,transparent 50%);z-index:0}
-.hero-content{position:relative;z-index:1;max-width:700px}
-.hero-logo{font-size:2.5rem;font-weight:800;margin-bottom:8px;letter-spacing:-1px}
-.hero-logo span{color:#FF3B3B}
-.hero h1{font-size:clamp(1.5rem,4vw,2.4rem);font-weight:700;margin-bottom:16px;line-height:1.3;opacity:0;animation:fadeUp .8s ease forwards}
-.hero p{font-size:clamp(1rem,2.5vw,1.15rem);color:#aaa;margin-bottom:36px;line-height:1.7;opacity:0;animation:fadeUp .8s ease .2s forwards}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(0,201,167,.1) 0%,transparent 45%),radial-gradient(circle at 70% 60%,rgba(0,160,220,.07) 0%,transparent 40%),radial-gradient(circle at 50% 80%,rgba(0,201,167,.05) 0%,transparent 35%);animation:bgFloat 20s ease-in-out infinite;z-index:0}
+@keyframes bgFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(-2%,2%)}}
+.hero-content{position:relative;z-index:1;max-width:720px}
+.hero-logo{font-size:2.8rem;font-weight:800;margin-bottom:12px;letter-spacing:-1px}
+.hero-logo span{color:#00C9A7}
+.hero-badge{display:inline-block;padding:6px 16px;border-radius:20px;background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.25);color:#00C9A7;font-size:.8rem;font-weight:600;margin-bottom:20px;letter-spacing:.5px;text-transform:uppercase}
+.hero h1{font-size:clamp(1.6rem,4.5vw,2.6rem);font-weight:700;margin-bottom:20px;line-height:1.25;opacity:0;animation:fadeUp .8s ease forwards}
+.hero p{font-size:clamp(1rem,2.5vw,1.15rem);color:#9aa;margin-bottom:40px;line-height:1.8;opacity:0;animation:fadeUp .8s ease .2s forwards}
 .hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp .8s ease .4s forwards}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 32px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;border:none;transition:transform .2s,box-shadow .2s;min-height:48px;text-decoration:none}
-.btn-primary{background:#FF3B3B;color:#fff}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,59,59,.3);text-decoration:none}
-.btn-secondary{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
-.btn-secondary:hover{background:rgba(255,255,255,.12);transform:translateY(-2px);text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:15px 34px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;border:none;transition:all .25s ease;min-height:52px;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,#00C9A7,#00A99D);color:#fff;box-shadow:0 4px 20px rgba(0,201,167,.2)}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 35px rgba(0,201,167,.35);text-decoration:none}
+.btn-secondary{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
+.btn-secondary:hover{background:rgba(255,255,255,.1);transform:translateY(-3px);text-decoration:none;border-color:rgba(0,201,167,.3)}
 
 /* SECTIONS */
-section{padding:80px 20px}
-.section-title{text-align:center;font-size:clamp(1.4rem,3.5vw,2rem);font-weight:700;margin-bottom:50px}
+section{padding:100px 24px}
+.section-title{text-align:center;font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:700;margin-bottom:16px}
+.section-sub{text-align:center;color:#7aa;font-size:1rem;margin-bottom:56px;max-width:550px;margin-left:auto;margin-right:auto}
 
 /* COMMENT CA MARCHE */
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;max-width:1000px;margin:0 auto}
-.step{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:36px 28px;text-align:center}
-.step-num{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:#FF3B3B;border-radius:50%;font-weight:700;font-size:.95rem;margin-bottom:16px}
+#steps{background:rgba(0,201,167,.02)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;max-width:1000px;margin:0 auto}
+.step{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:40px 28px 36px;text-align:center;transition:transform .3s,border-color .3s}
+.step:hover{transform:translateY(-4px);border-color:rgba(0,201,167,.2)}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;background:linear-gradient(135deg,#00C9A7,#00A99D);border-radius:12px;font-weight:700;font-size:1rem;margin-bottom:20px;color:#fff}
 .step-icon{margin-bottom:16px}
-.step-icon svg{width:48px;height:48px;stroke:#FF3B3B;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.step-icon svg{width:44px;height:44px;stroke:#00C9A7;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .step h3{font-size:1.1rem;margin-bottom:10px;font-weight:600}
-.step p{color:#aaa;font-size:.95rem;line-height:1.6}
+.step p{color:#8aa;font-size:.93rem;line-height:1.65}
 
 /* AVANTAGES */
-.advantages{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;max-width:1000px;margin:0 auto}
-.advantage{display:flex;gap:14px;align-items:flex-start;padding:20px;border-radius:12px;transition:background .2s}
-.advantage:hover{background:rgba(255,255,255,.03)}
-.advantage-check{flex-shrink:0;width:24px;height:24px;background:#FF3B3B;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.advantages{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-width:1000px;margin:0 auto}
+.advantage{display:flex;gap:16px;align-items:flex-start;padding:22px;border-radius:14px;transition:background .25s;border:1px solid transparent}
+.advantage:hover{background:rgba(0,201,167,.04);border-color:rgba(0,201,167,.1)}
+.advantage-check{flex-shrink:0;width:26px;height:26px;background:linear-gradient(135deg,#00C9A7,#00A99D);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-top:1px}
 .advantage-check svg{width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none}
-.advantage h4{font-size:1rem;font-weight:600;margin-bottom:4px}
-.advantage p{color:#aaa;font-size:.9rem;line-height:1.5}
+.advantage h4{font-size:1rem;font-weight:600;margin-bottom:5px}
+.advantage p{color:#8aa;font-size:.9rem;line-height:1.55}
 
 /* TARIF */
+#pricing{background:rgba(0,201,167,.02)}
 .pricing-wrap{display:flex;justify-content:center}
-.pricing-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,59,59,.25);border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 0 60px rgba(255,59,59,.08)}
-.pricing-price{font-size:3rem;font-weight:800;margin-bottom:4px}
-.pricing-price span{font-size:1.2rem;font-weight:400;color:#aaa}
-.pricing-old{color:#888;font-size:1rem;text-decoration:line-through;margin-bottom:24px}
-.pricing-features{list-style:none;text-align:left;margin:24px 0 32px}
-.pricing-features li{padding:8px 0;font-size:.95rem;display:flex;align-items:center;gap:10px;color:#ccc}
-.pricing-features li svg{width:18px;height:18px;stroke:#FF3B3B;fill:none;flex-shrink:0}
-.pricing-offer{background:rgba(255,59,59,.12);border:1px solid rgba(255,59,59,.3);border-radius:10px;padding:12px;margin-bottom:28px;font-weight:700;font-size:1.05rem;color:#FF3B3B}
-.pricing-note{color:#888;font-size:.85rem;margin-top:16px}
+.pricing-card{background:rgba(255,255,255,.03);border:1px solid rgba(0,201,167,.2);border-radius:24px;padding:52px 44px;max-width:440px;width:100%;text-align:center;position:relative;box-shadow:0 0 80px rgba(0,201,167,.06),0 0 30px rgba(0,201,167,.04)}
+.pricing-price{font-size:3.2rem;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#00C9A7,#00DDBB);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.pricing-price span{font-size:1.2rem;font-weight:400;-webkit-text-fill-color:#7aa}
+.pricing-old{color:#666;font-size:1rem;text-decoration:line-through;margin-bottom:28px}
+.pricing-features{list-style:none;text-align:left;margin:28px 0 32px}
+.pricing-features li{padding:9px 0;font-size:.95rem;display:flex;align-items:center;gap:12px;color:#bcc}
+.pricing-features li svg{width:18px;height:18px;stroke:#00C9A7;fill:none;flex-shrink:0}
+.pricing-offer{background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.25);border-radius:12px;padding:14px;margin-bottom:28px;font-weight:700;font-size:1.1rem;color:#00C9A7}
+.pricing-note{color:#666;font-size:.85rem;margin-top:18px}
 
 /* FAQ */
 .faq-list{max-width:700px;margin:0 auto}
-.faq-item{border-bottom:1px solid rgba(255,255,255,.08);overflow:hidden}
-.faq-q{padding:20px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1rem;user-select:none}
-.faq-q::after{content:'+';font-size:1.4rem;color:#FF3B3B;transition:transform .3s}
+.faq-item{border-bottom:1px solid rgba(255,255,255,.07);overflow:hidden}
+.faq-q{padding:22px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1rem;user-select:none;transition:color .2s}
+.faq-q:hover{color:#00C9A7}
+.faq-q::after{content:'+';font-size:1.4rem;color:#00C9A7;transition:transform .3s;flex-shrink:0;margin-left:16px}
 .faq-item.open .faq-q::after{transform:rotate(45deg)}
-.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;color:#aaa;font-size:.95rem;line-height:1.6}
-.faq-item.open .faq-a{max-height:200px;padding-bottom:20px}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;color:#8aa;font-size:.95rem;line-height:1.7}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:22px}
 
 /* CONTACT */
-.contact-section{background:rgba(255,255,255,.02)}
-.contact-form{max-width:500px;margin:0 auto}
-.form-group{margin-bottom:20px}
-.form-group label{display:block;font-size:.9rem;color:#aaa;margin-bottom:6px;font-weight:500}
-.form-group input{width:100%;padding:14px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;font-size:1rem;outline:none;transition:border-color .2s}
-.form-group input:focus{border-color:#FF3B3B}
-.form-group input::placeholder{color:#555}
+.contact-section{background:rgba(0,201,167,.02)}
+.contact-form{max-width:480px;margin:0 auto}
+.form-group{margin-bottom:22px}
+.form-group label{display:block;font-size:.88rem;color:#7aa;margin-bottom:8px;font-weight:500}
+.form-group input{width:100%;padding:15px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-size:1rem;outline:none;transition:border-color .25s,box-shadow .25s}
+.form-group input:focus{border-color:#00C9A7;box-shadow:0 0 0 3px rgba(0,201,167,.1)}
+.form-group input::placeholder{color:#445}
 .form-success{display:none;text-align:center;padding:40px 20px}
-.form-success h3{color:#FF3B3B;font-size:1.3rem;margin-bottom:8px}
-.form-success p{color:#aaa}
-.contact-email{text-align:center;margin-top:24px;color:#888;font-size:.9rem}
+.form-success h3{color:#00C9A7;font-size:1.3rem;margin-bottom:10px}
+.form-success p{color:#8aa}
+.contact-email{text-align:center;margin-top:28px;color:#667;font-size:.9rem}
 
 /* FOOTER */
-footer{border-top:1px solid rgba(255,255,255,.06);padding:32px 20px;text-align:center}
-footer p{color:#666;font-size:.85rem;line-height:1.8}
-footer a{color:#888}
+footer{border-top:1px solid rgba(255,255,255,.05);padding:36px 24px;text-align:center}
+footer p{color:#556;font-size:.85rem;line-height:1.9}
+footer a{color:#7aa}
 
 /* ANIMATIONS */
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .6s ease,transform .6s ease}
+.reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .7s ease,transform .7s ease}
 .reveal-left.visible{opacity:1;transform:translateX(0)}
 
 /* MOBILE */
 @media(max-width:640px){
-  section{padding:60px 16px}
-  .pricing-card{padding:36px 24px}
-  .hero{padding:60px 16px 40px}
-  .btn{padding:14px 24px;width:100%}
+  section{padding:70px 16px}
+  .pricing-card{padding:40px 24px}
+  .hero{padding:60px 16px 40px;min-height:calc(100vh - 40px)}
+  .btn{padding:15px 24px;width:100%}
   .hero-btns{flex-direction:column;align-items:center}
+  .section-title{font-size:1.5rem}
 }
 </style>
 </head>
@@ -112,6 +120,7 @@ footer a{color:#888}
 <!-- HERO -->
 <section class="hero" id="top">
 <div class="hero-content">
+  <div class="hero-badge">Assistant IA pour restaurants</div>
   <div class="hero-logo">IA<span>bot</span></div>
   <h1>Votre assistant IA qui prend les commandes à votre place.</h1>
   <p>Vos clients commandent depuis leur téléphone. Vous recevez les commandes sur Telegram.<br>Moins de file. Moins d’erreurs. Plus de commandes.</p>
@@ -126,6 +135,7 @@ footer a{color:#888}
 <section id="steps">
 <div class="container">
   <h2 class="section-title reveal">Comment ça marche</h2>
+  <p class="section-sub reveal">Trois étapes pour automatiser vos commandes.</p>
   <div class="steps">
     <div class="step reveal-left" style="transition-delay:.1s">
       <div class="step-num">1</div>
@@ -153,6 +163,7 @@ footer a{color:#888}
 <section id="advantages">
 <div class="container">
   <h2 class="section-title reveal">Pourquoi les restaurants halal choisissent IAbot</h2>
+  <p class="section-sub reveal">Tout ce qu’il faut pour moderniser votre prise de commandes.</p>
   <div class="advantages">
     <div class="advantage reveal">
       <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -186,6 +197,7 @@ footer a{color:#888}
 <section id="pricing">
 <div class="container">
   <h2 class="section-title reveal">Un seul tarif. Simple.</h2>
+  <p class="section-sub reveal">Pas de frais cachés. Pas d’engagement.</p>
   <div class="pricing-wrap">
     <div class="pricing-card reveal">
       <div class="pricing-price">249€<span>/mois</span></div>
@@ -200,7 +212,7 @@ footer a{color:#888}
         <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Support inclus</li>
         <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Sans engagement</li>
       </ul>
-      <div class="pricing-offer">Premier mois OFFERT</div>
+      <div class="pricing-offer">Premier jour OFFERT</div>
       <a href="#contact" class="btn btn-primary" style="width:100%">Essayer gratuitement</a>
       <p class="pricing-note">Offre de lancement — places limitées</p>
     </div>
@@ -212,6 +224,7 @@ footer a{color:#888}
 <section id="faq">
 <div class="container">
   <h2 class="section-title reveal">Questions fréquentes</h2>
+  <p class="section-sub reveal">Tout ce que vous devez savoir avant de commencer.</p>
   <div class="faq-list">
     <div class="faq-item"><div class="faq-q">C’est quoi exactement ?</div><div class="faq-a">Un assistant IA qui prend les commandes de vos clients depuis leur téléphone. Le client scanne un QR code, commande, et vous recevez la commande sur Telegram.</div></div>
     <div class="faq-item"><div class="faq-q">C’est halal ?</div><div class="faq-a">Oui. IAbot est conçu pour les restaurants halal. Aucun compromis sur les valeurs.</div></div>
@@ -228,6 +241,7 @@ footer a{color:#888}
 <section class="contact-section" id="contact">
 <div class="container">
   <h2 class="section-title reveal">Essayez gratuitement</h2>
+  <p class="section-sub reveal">Remplissez le formulaire et on vous configure tout.</p>
   <div class="contact-form" id="contactForm">
     <div class="form-group"><label>Nom du restaurant</label><input type="text" id="f-name" placeholder="Ex : Biggy Burger" required></div>
     <div class="form-group"><label>Ville</label><input type="text" id="f-city" placeholder="Ex : Paris" required></div>
@@ -255,7 +269,7 @@ footer a{color:#888}
 // Scroll reveal
 const obs = new IntersectionObserver((entries) => {
   entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
-}, {threshold: 0.15});
+}, {threshold: 0.12});
 document.querySelectorAll('.reveal, .reveal-left').forEach(el => obs.observe(el));
 
 // FAQ accordion
