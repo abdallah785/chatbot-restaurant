@@ -2,306 +2,514 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>IAbot — L’assistant IA pour restaurants halal</title>
-<meta name="description" content="Vos clients commandent depuis leur téléphone. Vous recevez les commandes sur Telegram. Moins de file. Moins d’erreurs. Plus de commandes.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<meta name="description" content="IAbot automatise les commandes de votre restaurant halal avec l’intelligence artificielle. Répondez à vos clients 24h/24 sur WhatsApp et Telegram.">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;background:#0a0a0a;color:#fff;line-height:1.7;overflow-x:hidden}
-a{color:#00C9A7;text-decoration:none}
-a:hover{text-decoration:underline}
-.container{max-width:1100px;margin:0 auto;padding:0 24px}
+:root{--bg:#050505;--bg2:#0a0a0a;--bg3:#111;--accent:#00C9A7;--accent2:#00E4FF;--accent3:#7B61FF;--text:#fff;--text2:#aaa;--text3:#666;--radius:16px;--glow:0 0 40px rgba(0,201,167,0.3)}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+::selection{background:var(--accent);color:#000}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
 
-/* HERO */
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(0,201,167,.1) 0%,transparent 45%),radial-gradient(circle at 70% 60%,rgba(0,160,220,.07) 0%,transparent 40%),radial-gradient(circle at 50% 80%,rgba(0,201,167,.05) 0%,transparent 35%);animation:bgFloat 20s ease-in-out infinite;z-index:0}
-@keyframes bgFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(-2%,2%)}}
-.hero-content{position:relative;z-index:1;max-width:720px}
-.hero-logo{font-size:2.8rem;font-weight:800;margin-bottom:12px;letter-spacing:-1px}
-.hero-logo span{color:#00C9A7}
-.hero-badge{display:inline-block;padding:6px 16px;border-radius:20px;background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.25);color:#00C9A7;font-size:.8rem;font-weight:600;margin-bottom:20px;letter-spacing:.5px;text-transform:uppercase}
-.hero h1{font-size:clamp(1.6rem,4.5vw,2.6rem);font-weight:700;margin-bottom:20px;line-height:1.25;opacity:0;animation:fadeUp .8s ease forwards}
-.hero p{font-size:clamp(1rem,2.5vw,1.15rem);color:#9aa;margin-bottom:40px;line-height:1.8;opacity:0;animation:fadeUp .8s ease .2s forwards}
-.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp .8s ease .4s forwards}
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:15px 34px;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;border:none;transition:all .25s ease;min-height:52px;text-decoration:none}
-.btn-primary{background:linear-gradient(135deg,#00C9A7,#00A99D);color:#fff;box-shadow:0 4px 20px rgba(0,201,167,.2)}
-.btn-primary:hover{transform:translateY(-3px);box-shadow:0 8px 35px rgba(0,201,167,.35);text-decoration:none}
-.btn-secondary{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px)}
-.btn-secondary:hover{background:rgba(255,255,255,.1);transform:translateY(-3px);text-decoration:none;border-color:rgba(0,201,167,.3)}
+/* PARTICLES CANVAS */
+#particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:16px 24px;backdrop-filter:blur(20px);background:rgba(5,5,5,0.7);border-bottom:1px solid rgba(255,255,255,0.05);transition:all 0.4s}
+.navbar.scrolled{background:rgba(5,5,5,0.95);box-shadow:0 4px 30px rgba(0,0,0,0.5)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-decoration:none}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:0.9rem;transition:color 0.3s;position:relative}
+.nav-links a:hover{color:var(--text)}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--accent);transition:width 0.3s}
+.nav-links a:hover::after{width:100%}
+.nav-cta{background:linear-gradient(135deg,var(--accent),var(--accent2))!important;color:#000!important;padding:8px 20px;border-radius:50px;font-weight:600;-webkit-text-fill-color:#000!important}
+.nav-cta::after{display:none!important}
+.mobile-toggle{display:none;background:none;border:none;color:var(--text);font-size:1.5rem;cursor:pointer}
 
 /* SECTIONS */
-section{padding:100px 24px}
-.section-title{text-align:center;font-size:clamp(1.5rem,3.5vw,2.1rem);font-weight:700;margin-bottom:16px}
-.section-sub{text-align:center;color:#7aa;font-size:1rem;margin-bottom:56px;max-width:550px;margin-left:auto;margin-right:auto}
+section{position:relative;z-index:1;padding:120px 24px}
+.container{max-width:1100px;margin:0 auto}
 
-/* COMMENT CA MARCHE */
-#steps{background:rgba(0,201,167,.02)}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;max-width:1000px;margin:0 auto}
-.step{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:40px 28px 36px;text-align:center;transition:transform .3s,border-color .3s}
-.step:hover{transform:translateY(-4px);border-color:rgba(0,201,167,.2)}
-.step-num{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;background:linear-gradient(135deg,#00C9A7,#00A99D);border-radius:12px;font-weight:700;font-size:1rem;margin-bottom:20px;color:#fff}
-.step-icon{margin-bottom:16px}
-.step-icon svg{width:44px;height:44px;stroke:#00C9A7;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.step h3{font-size:1.1rem;margin-bottom:10px;font-weight:600}
-.step p{color:#8aa;font-size:.93rem;line-height:1.65}
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding-top:100px;position:relative;overflow:hidden}
+.hero-bg-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.15;animation:orbFloat 8s ease-in-out infinite}
+.hero-bg-orb.orb1{width:500px;height:500px;background:var(--accent);top:-100px;left:-100px;animation-delay:0s}
+.hero-bg-orb.orb2{width:400px;height:400px;background:var(--accent2);bottom:-50px;right:-100px;animation-delay:2s}
+.hero-bg-orb.orb3{width:300px;height:300px;background:var(--accent3);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:4s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}25%{transform:translate(30px,-30px) scale(1.1)}50%{transform:translate(-20px,20px) scale(0.9)}75%{transform:translate(20px,10px) scale(1.05)}}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,201,167,0.1);border:1px solid rgba(0,201,167,0.3);padding:8px 20px;border-radius:50px;font-size:0.85rem;color:var(--accent);margin-bottom:24px;animation:fadeInUp 0.8s ease-out}
+.hero-badge .pulse-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(1.5)}}
+.hero h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:900;line-height:1.05;margin-bottom:20px;animation:fadeInUp 0.8s ease-out 0.1s both}
+.hero h1 .gradient-text{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:gradientShift 4s ease infinite}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero-sub{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--text2);max-width:600px;margin:0 auto 40px;animation:fadeInUp 0.8s ease-out 0.2s both}
+.hero-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeInUp 0.8s ease-out 0.3s both}
+.btn{padding:16px 36px;border-radius:50px;font-size:1rem;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);cursor:pointer;border:none;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;box-shadow:0 4px 25px rgba(0,201,167,0.4)}
+.btn-primary:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 8px 40px rgba(0,201,167,0.6)}
+.btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);transition:left 0.5s}
+.btn-primary:hover::before{left:100%}
+.btn-outline{background:transparent;color:var(--text);border:2px solid rgba(255,255,255,0.2);backdrop-filter:blur(10px)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px)}
 
-/* AVANTAGES */
-.advantages{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-width:1000px;margin:0 auto}
-.advantage{display:flex;gap:16px;align-items:flex-start;padding:22px;border-radius:14px;transition:background .25s;border:1px solid transparent}
-.advantage:hover{background:rgba(0,201,167,.04);border-color:rgba(0,201,167,.1)}
-.advantage-check{flex-shrink:0;width:26px;height:26px;background:linear-gradient(135deg,#00C9A7,#00A99D);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.advantage-check svg{width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none}
-.advantage h4{font-size:1rem;font-weight:600;margin-bottom:5px}
-.advantage p{color:#8aa;font-size:.9rem;line-height:1.55}
+/* FLOATING MOCKUP */
+.hero-mockup{margin-top:60px;animation:fadeInUp 1s ease-out 0.5s both;position:relative}
+.mockup-phone{width:280px;height:500px;background:var(--bg3);border-radius:40px;border:2px solid rgba(255,255,255,0.1);margin:0 auto;position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5);animation:float 6s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+.mockup-notch{width:120px;height:24px;background:#000;border-radius:0 0 16px 16px;margin:0 auto;position:relative;z-index:2}
+.mockup-screen{padding:16px;height:calc(100% - 24px);display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.mockup-msg{padding:10px 14px;border-radius:16px;font-size:0.75rem;max-width:85%;animation:msgAppear 0.5s ease-out both;opacity:0}
+.mockup-msg.bot{background:rgba(0,201,167,0.15);color:var(--accent);border-bottom-left-radius:4px;align-self:flex-start}
+.mockup-msg.user{background:rgba(255,255,255,0.1);color:var(--text);border-bottom-right-radius:4px;align-self:flex-end}
+@keyframes msgAppear{to{opacity:1;transform:translateY(0)}from{opacity:0;transform:translateY(10px)}}
+.mockup-msg:nth-child(1){animation-delay:1s}
+.mockup-msg:nth-child(2){animation-delay:2s}
+.mockup-msg:nth-child(3){animation-delay:3s}
+.mockup-msg:nth-child(4){animation-delay:4s}
+.mockup-msg:nth-child(5){animation-delay:5s}
+.mockup-msg:nth-child(6){animation-delay:6s}
+.mockup-glow{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:var(--accent);border-radius:50%;filter:blur(80px);opacity:0.2}
 
-/* TARIF */
-#pricing{background:rgba(0,201,167,.02)}
-.pricing-wrap{display:flex;justify-content:center}
-.pricing-card{background:rgba(255,255,255,.03);border:1px solid rgba(0,201,167,.2);border-radius:24px;padding:52px 44px;max-width:440px;width:100%;text-align:center;position:relative;box-shadow:0 0 80px rgba(0,201,167,.06),0 0 30px rgba(0,201,167,.04)}
-.pricing-price{font-size:3.2rem;font-weight:800;margin-bottom:4px;background:linear-gradient(135deg,#00C9A7,#00DDBB);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.pricing-price span{font-size:1.2rem;font-weight:400;-webkit-text-fill-color:#7aa}
-.pricing-old{color:#666;font-size:1rem;text-decoration:line-through;margin-bottom:28px}
-.pricing-features{list-style:none;text-align:left;margin:28px 0 32px}
-.pricing-features li{padding:9px 0;font-size:.95rem;display:flex;align-items:center;gap:12px;color:#bcc}
-.pricing-features li svg{width:18px;height:18px;stroke:#00C9A7;fill:none;flex-shrink:0}
-.pricing-offer{background:rgba(0,201,167,.1);border:1px solid rgba(0,201,167,.25);border-radius:12px;padding:14px;margin-bottom:28px;font-weight:700;font-size:1.1rem;color:#00C9A7}
-.pricing-note{color:#666;font-size:.85rem;margin-top:18px}
+/* STATS BAR */
+.stats-bar{padding:60px 24px;position:relative;z-index:1}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;max-width:900px;margin:0 auto}
+.stat-item{text-align:center}
+.stat-number{font-size:3rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{color:var(--text2);font-size:0.9rem;margin-top:4px}
+
+/* SECTION HEADERS */
+.section-header{text-align:center;margin-bottom:60px}
+.section-tag{display:inline-block;color:var(--accent);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px}
+.section-title{font-size:clamp(2rem,4vw,3rem);font-weight:800}
+.section-desc{color:var(--text2);max-width:550px;margin:16px auto 0;font-size:1.05rem}
+
+/* STEPS (COMMENT CA MARCHE) */
+.steps-section{background:var(--bg2)}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;position:relative}
+.step-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:40px 32px;text-align:center;transition:all 0.5s;position:relative;overflow:hidden}
+.step-card:hover{transform:translateY(-8px);border-color:rgba(0,201,167,0.3);box-shadow:var(--glow)}
+.step-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity 0.5s}
+.step-card:hover::before{opacity:1}
+.step-number{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:#000;margin:0 auto 20px}
+.step-icon{font-size:2.5rem;margin-bottom:16px}
+.step-card h3{font-size:1.2rem;margin-bottom:10px}
+.step-card p{color:var(--text2);font-size:0.95rem}
+.step-connector{display:none}
+@media(min-width:900px){.steps-grid{grid-template-columns:1fr 1fr 1fr}.step-connector{display:block;position:absolute;top:50%;width:40px;height:2px;background:linear-gradient(90deg,var(--accent),transparent);right:-20px}}
+
+/* ADVANTAGES */
+.advantages-section{background:var(--bg)}
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.adv-card{display:flex;gap:16px;padding:28px;border-radius:var(--radius);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);transition:all 0.4s;cursor:default}
+.adv-card:hover{background:rgba(0,201,167,0.05);border-color:rgba(0,201,167,0.2);transform:translateX(8px)}
+.adv-icon{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,rgba(0,201,167,0.2),rgba(0,228,255,0.1));display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.adv-card h4{font-size:1.05rem;margin-bottom:4px}
+.adv-card p{color:var(--text2);font-size:0.9rem}
+
+/* PRICING */
+.pricing-section{background:var(--bg2);overflow:hidden}
+.pricing-wrapper{max-width:480px;margin:0 auto;position:relative}
+.pricing-card{background:rgba(255,255,255,0.03);border:2px solid rgba(0,201,167,0.3);border-radius:24px;padding:48px 40px;text-align:center;position:relative;overflow:hidden;transition:all 0.5s}
+.pricing-card:hover{transform:scale(1.02);border-color:var(--accent);box-shadow:0 0 60px rgba(0,201,167,0.2)}
+.pricing-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent,rgba(0,201,167,0.05),transparent,rgba(0,228,255,0.05),transparent);animation:rotateBg 10s linear infinite}
+@keyframes rotateBg{to{transform:rotate(360deg)}}
+.pricing-card>*{position:relative;z-index:1}
+.pricing-badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;padding:6px 20px;border-radius:50px;font-size:0.8rem;font-weight:700;margin-bottom:20px;text-transform:uppercase;letter-spacing:1px}
+.pricing-amount{font-size:4rem;font-weight:900;line-height:1}
+.pricing-amount span{font-size:1.2rem;color:var(--text2);font-weight:400}
+.pricing-trial{color:var(--accent);font-size:1.1rem;font-weight:600;margin:16px 0 24px;padding:10px;background:rgba(0,201,167,0.1);border-radius:12px;border:1px dashed rgba(0,201,167,0.3)}
+.pricing-features{list-style:none;text-align:left;margin:24px 0;display:flex;flex-direction:column;gap:14px}
+.pricing-features li{display:flex;align-items:center;gap:12px;color:var(--text2);font-size:0.95rem}
+.pricing-features li svg{width:20px;height:20px;color:var(--accent);flex-shrink:0}
+.pricing-cta{width:100%;padding:18px;font-size:1.1rem}
 
 /* FAQ */
-.faq-list{max-width:700px;margin:0 auto}
-.faq-item{border-bottom:1px solid rgba(255,255,255,.07);overflow:hidden}
-.faq-q{padding:22px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1rem;user-select:none;transition:color .2s}
-.faq-q:hover{color:#00C9A7}
-.faq-q::after{content:'+';font-size:1.4rem;color:#00C9A7;transition:transform .3s;flex-shrink:0;margin-left:16px}
-.faq-item.open .faq-q::after{transform:rotate(45deg)}
-.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease;color:#8aa;font-size:.95rem;line-height:1.7}
-.faq-item.open .faq-a{max-height:200px;padding-bottom:22px}
+.faq-section{background:var(--bg)}
+.faq-list{max-width:700px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.faq-item{border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);overflow:hidden;transition:all 0.3s}
+.faq-item:hover{border-color:rgba(0,201,167,0.2)}
+.faq-item.active{border-color:rgba(0,201,167,0.3);background:rgba(0,201,167,0.03)}
+.faq-q{padding:20px 24px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1rem;transition:color 0.3s}
+.faq-q:hover{color:var(--accent)}
+.faq-arrow{transition:transform 0.4s;font-size:1.2rem;color:var(--accent)}
+.faq-item.active .faq-arrow{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.5s cubic-bezier(0.4,0,0.2,1),padding 0.3s}
+.faq-a-inner{padding:0 24px 20px;color:var(--text2);font-size:0.95rem;line-height:1.7}
 
 /* CONTACT */
-.contact-section{background:rgba(0,201,167,.02)}
-.contact-form{max-width:480px;margin:0 auto}
-.form-group{margin-bottom:22px}
-.form-group label{display:block;font-size:.88rem;color:#7aa;margin-bottom:8px;font-weight:500}
-.form-group input{width:100%;padding:15px 18px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-size:1rem;outline:none;transition:border-color .25s,box-shadow .25s}
-.form-group input:focus{border-color:#00C9A7;box-shadow:0 0 0 3px rgba(0,201,167,.1)}
-.form-group input::placeholder{color:#445}
-.form-success{display:none;text-align:center;padding:40px 20px}
-.form-success h3{color:#00C9A7;font-size:1.3rem;margin-bottom:10px}
-.form-success p{color:#8aa}
-.contact-email{text-align:center;margin-top:28px;color:#667;font-size:.9rem}
+.contact-section{background:var(--bg2)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.contact-info h3{font-size:1.8rem;margin-bottom:16px}
+.contact-info p{color:var(--text2);margin-bottom:24px}
+.contact-channels{display:flex;flex-direction:column;gap:12px}
+.contact-channel{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);transition:all 0.3s}
+.contact-channel:hover{border-color:rgba(0,201,167,0.3);background:rgba(0,201,167,0.05)}
+.contact-channel-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(0,201,167,0.2),rgba(0,228,255,0.1));display:flex;align-items:center;justify-content:center}
+.contact-form{display:flex;flex-direction:column;gap:16px}
+.form-group{position:relative}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:16px 20px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;color:var(--text);font-size:1rem;font-family:inherit;transition:all 0.3s;outline:none}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent);box-shadow:0 0 20px rgba(0,201,167,0.15)}
+.form-group textarea{resize:vertical;min-height:100px}
+.form-group select option{background:var(--bg2);color:var(--text)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-success{display:none;text-align:center;padding:40px;animation:fadeInUp 0.5s}
+.form-success.show{display:block}
+.form-success .check-circle{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2rem;animation:scaleIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275)}
+@keyframes scaleIn{from{transform:scale(0)}to{transform:scale(1)}}
 
 /* FOOTER */
-footer{border-top:1px solid rgba(255,255,255,.05);padding:36px 24px;text-align:center}
-footer p{color:#556;font-size:.85rem;line-height:1.9}
-footer a{color:#7aa}
+.footer{background:var(--bg);border-top:1px solid rgba(255,255,255,0.05);padding:40px 24px;text-align:center;position:relative;z-index:1}
+.footer p{color:var(--text3);font-size:0.85rem}
+.footer a{color:var(--accent);text-decoration:none}
 
-/* ANIMATIONS */
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.5,0,0,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-left{opacity:0;transform:translateX(-30px);transition:opacity .7s ease,transform .7s ease}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:all 0.8s cubic-bezier(0.5,0,0,1)}
 .reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(40px);transition:all 0.8s cubic-bezier(0.5,0,0,1)}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
 /* MOBILE */
-@media(max-width:640px){
-  section{padding:70px 16px}
-  .pricing-card{padding:40px 24px}
-  .hero{padding:60px 16px 40px;min-height:calc(100vh - 40px)}
-  .btn{padding:15px 24px;width:100%}
-  .hero-btns{flex-direction:column;align-items:center}
-  .section-title{font-size:1.5rem}
+@media(max-width:768px){
+.nav-links{display:none;position:fixed;top:70px;left:0;right:0;bottom:0;background:rgba(5,5,5,0.98);flex-direction:column;justify-content:center;align-items:center;gap:32px}
+.nav-links.open{display:flex}
+.mobile-toggle{display:block}
+.hero h1{font-size:2.2rem}
+.stats-grid{grid-template-columns:1fr 1fr}
+.contact-grid{grid-template-columns:1fr}
+.form-row{grid-template-columns:1fr}
+.mockup-phone{width:220px;height:400px}
 }
 </style>
 </head>
 <body>
+<canvas id="particles-canvas"></canvas>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+<div class="nav-inner">
+<a href="#" class="nav-logo">IAbot</a>
+<button class="mobile-toggle" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">☰</button>
+<div class="nav-links">
+<a href="#steps">Fonctionnement</a>
+<a href="#avantages">Avantages</a>
+<a href="#tarif">Tarif</a>
+<a href="#faq">FAQ</a>
+<a href="#contact" class="nav-cta">Essayer</a>
+</div>
+</div>
+</nav>
 
 <!-- HERO -->
-<section class="hero" id="top">
-<div class="hero-content">
-  <div class="hero-badge">Assistant IA pour restaurants</div>
-  <div class="hero-logo">IA<span>bot</span></div>
-  <h1>Votre assistant IA qui prend les commandes à votre place.</h1>
-  <p>Vos clients commandent depuis leur téléphone. Vous recevez les commandes sur Telegram.<br>Moins de file. Moins d’erreurs. Plus de commandes.</p>
-  <div class="hero-btns">
-    <a href="#contact" class="btn btn-primary">Essayer gratuitement</a>
-    <a href="https://chat.iabot.live/chat/?resto=delims-burger" target="_blank" rel="noopener" class="btn btn-secondary">Voir la démo</a>
-  </div>
+<section class="hero" id="hero">
+<div class="hero-bg-orb orb1"></div>
+<div class="hero-bg-orb orb2"></div>
+<div class="hero-bg-orb orb3"></div>
+<div class="container">
+<div class="hero-badge"><span class="pulse-dot"></span> Assistant IA pour restaurants</div>
+<h1>Automatisez vos<br><span class="gradient-text">commandes</span> avec l’IA</h1>
+<p class="hero-sub">Votre assistant intelligent répond à vos clients 24h/24, prend les commandes et booste votre chiffre d’affaires. Sans effort.</p>
+<div class="hero-buttons">
+<a href="#contact" class="btn btn-primary">Essayer gratuitement <span>→</span></a>
+<a href="chat/?resto=delims-burger" class="btn btn-outline">Voir la démo</a>
+</div>
+<div class="hero-mockup">
+<div class="mockup-phone">
+<div class="mockup-notch"></div>
+<div class="mockup-screen">
+<div class="mockup-msg bot">Bienvenue chez Delims Burger ! Que souhaitez-vous commander ?</div>
+<div class="mockup-msg user">Je voudrais un Smash Burger</div>
+<div class="mockup-msg bot">Excellent choix ! Quel menu ? M, L ou XL ?</div>
+<div class="mockup-msg user">Menu L svp</div>
+<div class="mockup-msg bot">Boisson : Coca, Fanta, Sprite ou Ice Tea ?</div>
+<div class="mockup-msg user">Coca</div>
+</div>
+<div class="mockup-glow"></div>
+</div>
+</div>
 </div>
 </section>
+
+<!-- STATS -->
+<div class="stats-bar">
+<div class="stats-grid">
+<div class="stat-item reveal"><div class="stat-number" data-count="500">0</div><div class="stat-label">Commandes gérées</div></div>
+<div class="stat-item reveal"><div class="stat-number" data-count="24">0</div><div class="stat-label">Heures / 24 disponible</div></div>
+<div class="stat-item reveal"><div class="stat-number" data-count="3">0</div><div class="stat-label">Secondes de réponse</div></div>
+<div class="stat-item reveal"><div class="stat-number" data-count="0">0%</div><div class="stat-label">Erreurs de commande</div></div>
+</div>
+</div>
 
 <!-- COMMENT CA MARCHE -->
-<section id="steps">
+<section class="steps-section" id="steps">
 <div class="container">
-  <h2 class="section-title reveal">Comment ça marche</h2>
-  <p class="section-sub reveal">Trois étapes pour automatiser vos commandes.</p>
-  <div class="steps">
-    <div class="step reveal-left" style="transition-delay:.1s">
-      <div class="step-num">1</div>
-      <div class="step-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
-      <h3>Le client scanne le QR code</h3>
-      <p>Sur votre comptoir, votre table, ou votre vitrine. Le client ouvre le chatbot depuis son téléphone.</p>
-    </div>
-    <div class="step reveal-left" style="transition-delay:.25s">
-      <div class="step-num">2</div>
-      <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
-      <h3>Il commande en 30 secondes</h3>
-      <p>L’assistant IA guide le client : menu, options, modifications, récap. Tout est automatique.</p>
-    </div>
-    <div class="step reveal-left" style="transition-delay:.4s">
-      <div class="step-num">3</div>
-      <div class="step-icon"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
-      <h3>Vous recevez la commande</h3>
-      <p>La commande arrive sur votre Telegram, formatée et prête à préparer. Nom, plats, total, service.</p>
-    </div>
-  </div>
+<div class="section-header reveal">
+<div class="section-tag">Comment ça marche</div>
+<h2 class="section-title">3 étapes simples</h2>
+<p class="section-desc">Mettez en place votre assistant IA en quelques minutes, pas en quelques mois.</p>
+</div>
+<div class="steps-grid">
+<div class="step-card reveal">
+<div class="step-number">1</div>
+<div class="step-icon">📋</div>
+<h3>Envoyez votre menu</h3>
+<p>Partagez votre carte et vos prix. On configure tout pour vous en 24h.</p>
+</div>
+<div class="step-card reveal">
+<div class="step-number">2</div>
+<div class="step-icon">🚀</div>
+<h3>On active le bot</h3>
+<p>Votre assistant est connecté à WhatsApp, Telegram et votre site web.</p>
+</div>
+<div class="step-card reveal">
+<div class="step-number">3</div>
+<div class="step-icon">💰</div>
+<h3>Les commandes arrivent</h3>
+<p>Vos clients commandent en autonomie. Vous recevez tout sur Telegram.</p>
+</div>
+</div>
 </div>
 </section>
-
 <!-- AVANTAGES -->
-<section id="advantages">
+<section class="advantages-section" id="avantages">
 <div class="container">
-  <h2 class="section-title reveal">Pourquoi les restaurants halal choisissent IAbot</h2>
-  <p class="section-sub reveal">Tout ce qu’il faut pour moderniser votre prise de commandes.</p>
-  <div class="advantages">
-    <div class="advantage reveal">
-      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><h4>Moins de file d’attente</h4><p>Vos clients commandent avant d’arriver ou en attendant.</p></div>
-    </div>
-    <div class="advantage reveal">
-      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><h4>Zéro erreur de commande</h4><p>L’IA confirme chaque détail : sauce, garniture, cuisson.</p></div>
-    </div>
-    <div class="advantage reveal">
-      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><h4>Plus de commandes</h4><p>Disponible 24h/24. Le client commande même quand vous êtes fermé.</p></div>
-    </div>
-    <div class="advantage reveal">
-      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><h4>Menu 100% personnalisable</h4><p>Vos plats, vos prix, vos questions. Modifiable à tout moment.</p></div>
-    </div>
-    <div class="advantage reveal">
-      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><h4>Installation en 5 minutes</h4><p>On s’occupe de tout. Vous avez juste à installer Telegram.</p></div>
-    </div>
-    <div class="advantage reveal">
-      <div class="advantage-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><h4>Certifié halal</h4><p>Conçu pour les restaurants halal. Aucun compromis.</p></div>
-    </div>
-  </div>
+<div class="section-header reveal">
+<div class="section-tag">Pourquoi IAbot</div>
+<h2 class="section-title">Vos avantages</h2>
+<p class="section-desc">Tout ce dont votre restaurant a besoin pour passer au niveau supérieur.</p>
+</div>
+<div class="adv-grid">
+<div class="adv-card reveal"><div class="adv-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div><div><h4>Disponible 24h/24</h4><p>Votre bot ne dort jamais. Commandes acceptées même à 3h du matin.</p></div></div>
+<div class="adv-card reveal"><div class="adv-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div><h4>Réponse en 3 secondes</h4><p>Pas d’attente. Le client reçoit une réponse instantanée.</p></div></div>
+<div class="adv-card reveal"><div class="adv-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><div><h4>Multi-plateforme</h4><p>WhatsApp, Telegram, site web. Un seul bot, partout.</p></div></div>
+<div class="adv-card reveal"><div class="adv-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><h4>Zéro erreur</h4><p>L’IA comprend et vérifie chaque commande avant validation.</p></div></div>
+<div class="adv-card reveal"><div class="adv-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div><div><h4>Notifications en temps réel</h4><p>Chaque commande arrive directement sur votre Telegram.</p></div></div>
+<div class="adv-card reveal"><div class="adv-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><h4>ROI immédiat</h4><p>Plus de commandes, moins de téléphone. Rentabilisé dès le premier mois.</p></div></div>
+</div>
 </div>
 </section>
 
 <!-- TARIF -->
-<section id="pricing">
+<section class="pricing-section" id="tarif">
 <div class="container">
-  <h2 class="section-title reveal">Un seul tarif. Simple.</h2>
-  <p class="section-sub reveal">Pas de frais cachés. Pas d’engagement.</p>
-  <div class="pricing-wrap">
-    <div class="pricing-card reveal">
-      <div class="pricing-price">249€<span>/mois</span></div>
-      <div class="pricing-old">au lieu de 359€</div>
-      <ul class="pricing-features">
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Chatbot IA intelligent</li>
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Commandes automatiques</li>
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Réception sur Telegram</li>
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>QR code personnalisé</li>
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Dashboard restaurant</li>
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Menu modifiable en temps réel</li>
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Support inclus</li>
-        <li><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke-width="2"/></svg>Sans engagement</li>
-      </ul>
-      <div class="pricing-offer">Premier jour OFFERT</div>
-      <a href="#contact" class="btn btn-primary" style="width:100%">Essayer gratuitement</a>
-      <p class="pricing-note">Offre de lancement — places limitées</p>
-    </div>
-  </div>
+<div class="section-header reveal">
+<div class="section-tag">Tarif transparent</div>
+<h2 class="section-title">Un prix simple</h2>
+<p class="section-desc">Pas de frais cachés. Pas d’engagement. Annulez quand vous voulez.</p>
+</div>
+<div class="pricing-wrapper reveal">
+<div class="pricing-card">
+<div class="pricing-badge">Offre de lancement</div>
+<div class="pricing-amount">249€<span>/mois</span></div>
+<div class="pricing-trial">Premier jour OFFERT — testez sans risque</div>
+<ul class="pricing-features">
+<li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Chatbot IA personnalisé à votre menu</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>WhatsApp + Telegram + Site web</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Dashboard de gestion en temps réel</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Notifications Telegram instantanées</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>QR code pour vos tables</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Support prioritaire 7j/7</li>
+<li><svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Mises à jour automatiques</li>
+</ul>
+<a href="#contact" class="btn btn-primary pricing-cta">Commencer maintenant <span>→</span></a>
+</div>
+</div>
 </div>
 </section>
 
 <!-- FAQ -->
-<section id="faq">
+<section class="faq-section" id="faq">
 <div class="container">
-  <h2 class="section-title reveal">Questions fréquentes</h2>
-  <p class="section-sub reveal">Tout ce que vous devez savoir avant de commencer.</p>
-  <div class="faq-list">
-    <div class="faq-item"><div class="faq-q">C’est quoi exactement ?</div><div class="faq-a">Un assistant IA qui prend les commandes de vos clients depuis leur téléphone. Le client scanne un QR code, commande, et vous recevez la commande sur Telegram.</div></div>
-    <div class="faq-item"><div class="faq-q">C’est halal ?</div><div class="faq-a">Oui. IAbot est conçu pour les restaurants halal. Aucun compromis sur les valeurs.</div></div>
-    <div class="faq-item"><div class="faq-q">Ça prend combien de temps à installer ?</div><div class="faq-a">5 minutes. On s’occupe de tout. Vous avez juste à installer Telegram (gratuit).</div></div>
-    <div class="faq-item"><div class="faq-q">Je peux modifier mon menu ?</div><div class="faq-a">Oui. Depuis votre dashboard, vous ajoutez, modifiez ou supprimez des plats en 2 clics.</div></div>
-    <div class="faq-item"><div class="faq-q">Et si je veux arrêter ?</div><div class="faq-a">Pas d’engagement. Vous arrêtez quand vous voulez.</div></div>
-    <div class="faq-item"><div class="faq-q">Comment les clients commandent ?</div><div class="faq-a">Ils scannent le QR code sur votre comptoir. Le chatbot s’ouvre sur leur téléphone. Ils commandent en discutant avec l’assistant.</div></div>
-    <div class="faq-item"><div class="faq-q">Je reçois les commandes où ?</div><div class="faq-a">Sur Telegram. Chaque commande arrive avec le nom, les plats, le total, et le type de service (sur place ou à emporter).</div></div>
-  </div>
+<div class="section-header reveal">
+<div class="section-tag">FAQ</div>
+<h2 class="section-title">Questions fréquentes</h2>
+</div>
+<div class="faq-list">
+<div class="faq-item reveal"><div class="faq-q" onclick="this.parentElement.classList.toggle('active');let a=this.nextElementSibling;a.style.maxHeight=a.style.maxHeight?null:a.scrollHeight+'px'">C’est quoi IAbot exactement ?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner">IAbot est un assistant IA qui gère automatiquement les commandes de votre restaurant. Il répond aux clients sur WhatsApp, Telegram et votre site web, prend les commandes, et vous envoie tout sur Telegram en temps réel.</div></div></div>
+<div class="faq-item reveal"><div class="faq-q" onclick="this.parentElement.classList.toggle('active');let a=this.nextElementSibling;a.style.maxHeight=a.style.maxHeight?null:a.scrollHeight+'px'">Combien de temps pour installer ?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner">24 heures. Envoyez-nous votre menu et vos prix, on s’occupe de tout. Votre bot est opérationnel le lendemain.</div></div></div>
+<div class="faq-item reveal"><div class="faq-q" onclick="this.parentElement.classList.toggle('active');let a=this.nextElementSibling;a.style.maxHeight=a.style.maxHeight?null:a.scrollHeight+'px'">Ça marche avec mon système de caisse ?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner">IAbot fonctionne indépendamment. Les commandes arrivent sur Telegram et le dashboard. Pas besoin de modifier votre caisse.</div></div></div>
+<div class="faq-item reveal"><div class="faq-q" onclick="this.parentElement.classList.toggle('active');let a=this.nextElementSibling;a.style.maxHeight=a.style.maxHeight?null:a.scrollHeight+'px'">Je peux modifier mon menu facilement ?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner">Oui ! Envoyez-nous les modifications par Telegram et on met à jour le menu en quelques heures. Changement de prix, nouveaux plats, promotions...</div></div></div>
+<div class="faq-item reveal"><div class="faq-q" onclick="this.parentElement.classList.toggle('active');let a=this.nextElementSibling;a.style.maxHeight=a.style.maxHeight?null:a.scrollHeight+'px'">Et si le client pose une question bizarre ?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner">L’IA est entraînée pour gérer tous les cas : questions hors sujet, blagues, demandes spéciales. Elle recentre toujours la conversation vers la commande.</div></div></div>
+<div class="faq-item reveal"><div class="faq-q" onclick="this.parentElement.classList.toggle('active');let a=this.nextElementSibling;a.style.maxHeight=a.style.maxHeight?null:a.scrollHeight+'px'">Y a-t-il un engagement ?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner">Non, aucun engagement. Vous pouvez annuler à tout moment. Premier jour offert pour tester sans risque.</div></div></div>
+<div class="faq-item reveal"><div class="faq-q" onclick="this.parentElement.classList.toggle('active');let a=this.nextElementSibling;a.style.maxHeight=a.style.maxHeight?null:a.scrollHeight+'px'">Le bot parle en quelle langue ?<span class="faq-arrow">▼</span></div><div class="faq-a"><div class="faq-a-inner">Français par défaut, mais l’IA peut répondre dans plusieurs langues si un client écrit en arabe, anglais ou autre.</div></div></div>
+</div>
 </div>
 </section>
-
 <!-- CONTACT -->
 <section class="contact-section" id="contact">
 <div class="container">
-  <h2 class="section-title reveal">Essayez gratuitement</h2>
-  <p class="section-sub reveal">Remplissez le formulaire et on vous configure tout.</p>
-  <div class="contact-form" id="contactForm">
-    <div class="form-group"><label>Nom du restaurant</label><input type="text" id="f-name" placeholder="Ex : Biggy Burger" required></div>
-    <div class="form-group"><label>Ville</label><input type="text" id="f-city" placeholder="Ex : Paris" required></div>
-    <div class="form-group"><label>Téléphone</label><input type="tel" id="f-phone" placeholder="06 12 34 56 78" required></div>
-    <div class="form-group"><label>Email (optionnel)</label><input type="email" id="f-email" placeholder="contact@monrestaurant.fr"></div>
-    <button type="button" class="btn btn-primary" style="width:100%" id="submitBtn" onclick="submitForm()">Démarrer mon essai gratuit</button>
-  </div>
-  <div class="form-success" id="formSuccess">
-    <h3>Merci !</h3>
-    <p>On vous contacte dans les 24h.</p>
-  </div>
-  <p class="contact-email">Ou écrivez-nous : <a href="mailto:iabot1019@gmail.com">iabot1019@gmail.com</a></p>
+<div class="section-header reveal">
+<div class="section-tag">Contact</div>
+<h2 class="section-title">Lancez-vous aujourd’hui</h2>
+<p class="section-desc">Remplissez le formulaire et on vous contacte dans les 24h.</p>
+</div>
+<div class="contact-grid">
+<div class="contact-info reveal-left">
+<h3>Prêt à automatiser ?</h3>
+<p>Rejoignez les restaurants qui ont déjà fait le pas vers l’automatisation intelligente.</p>
+<div class="contact-channels">
+<div class="contact-channel"><div class="contact-channel-icon"><svg width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div><div><strong>Téléphone</strong><br><span style="color:var(--text2)">Sur demande</span></div></div>
+<div class="contact-channel"><div class="contact-channel-icon"><svg width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div><div><strong>Telegram</strong><br><span style="color:var(--text2)">Réponse rapide</span></div></div>
+<div class="contact-channel"><div class="contact-channel-icon"><svg width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><strong>Email</strong><br><span style="color:var(--text2)">iabot1019@gmail.com</span></div></div>
+</div>
+</div>
+<div class="reveal-right">
+<form class="contact-form" id="contactForm" onsubmit="submitForm(event)">
+<div class="form-row">
+<div class="form-group"><input type="text" name="nom" placeholder="Votre nom" required></div>
+<div class="form-group"><input type="text" name="restaurant" placeholder="Nom du restaurant" required></div>
+</div>
+<div class="form-group"><input type="tel" name="telephone" placeholder="Téléphone" required></div>
+<div class="form-group"><input type="email" name="email" placeholder="Email (optionnel)"></div>
+<div class="form-group">
+<select name="plateforme">
+<option value="" disabled selected>Plateformes souhaitées</option>
+<option>WhatsApp</option>
+<option>Telegram</option>
+<option>Site web</option>
+<option>Toutes</option>
+</select>
+</div>
+<div class="form-group"><textarea name="message" placeholder="Un message ? (optionnel)" rows="3"></textarea></div>
+<button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Envoyer la demande <span>→</span></button>
+</form>
+<div class="form-success" id="formSuccess">
+<div class="check-circle">✓</div>
+<h3>Demande envoyée !</h3>
+<p style="color:var(--text2);margin-top:8px">On vous contacte dans les 24h maximum.</p>
+</div>
+</div>
+</div>
 </div>
 </section>
 
 <!-- FOOTER -->
-<footer>
+<footer class="footer">
 <div class="container">
-  <p><strong>IAbot</strong> — L’assistant IA pour restaurants halal</p>
-  <p>© 2026 IAbot. Tous droits réservés. — <a href="mailto:iabot1019@gmail.com">iabot1019@gmail.com</a></p>
+<p>© 2025 <a href="#">IAbot</a> — Assistant IA pour restaurants halal. Tous droits réservés.</p>
 </div>
 </footer>
-
 <script>
-// Scroll reveal
-const obs = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
-}, {threshold: 0.12});
-document.querySelectorAll('.reveal, .reveal-left').forEach(el => obs.observe(el));
+/* PARTICLES */
+(function(){
+const canvas=document.getElementById('particles-canvas');
+const ctx=canvas.getContext('2d');
+let particles=[];
+let w,h;
+function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight}
+window.addEventListener('resize',resize);resize();
+class Particle{
+constructor(){this.reset()}
+reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.size=Math.random()*2+0.5;this.speedX=(Math.random()-0.5)*0.5;this.speedY=(Math.random()-0.5)*0.5;this.opacity=Math.random()*0.5+0.1;this.color=Math.random()>0.5?'0,201,167':'0,228,255'}
+update(){this.x+=this.speedX;this.y+=this.speedY;if(this.x<0||this.x>w||this.y<0||this.y>h)this.reset()}
+draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle='rgba('+this.color+','+this.opacity+')';ctx.fill()}
+}
+for(let i=0;i<80;i++)particles.push(new Particle());
+function connectParticles(){for(let i=0;i<particles.length;i++){for(let j=i+1;j<particles.length;j++){const dx=particles[i].x-particles[j].x;const dy=particles[i].y-particles[j].y;const dist=Math.sqrt(dx*dx+dy*dy);if(dist<120){ctx.beginPath();ctx.strokeStyle='rgba(0,201,167,'+(0.1*(1-dist/120))+')';ctx.lineWidth=0.5;ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.stroke()}}}}
+function animate(){ctx.clearRect(0,0,w,h);particles.forEach(p=>{p.update();p.draw()});connectParticles();requestAnimationFrame(animate)}
+animate();
+})();
 
-// FAQ accordion
-document.querySelectorAll('.faq-q').forEach(q => {
-  q.addEventListener('click', () => {
-    const item = q.parentElement;
-    const wasOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-    if(!wasOpen) item.classList.add('open');
-  });
+/* MOUSE PARALLAX ON HERO */
+document.querySelector('.hero').addEventListener('mousemove',function(e){
+const orbs=document.querySelectorAll('.hero-bg-orb');
+const x=(e.clientX/window.innerWidth-0.5)*30;
+const y=(e.clientY/window.innerHeight-0.5)*30;
+orbs[0].style.transform='translate('+x+'px,'+y+'px)';
+orbs[1].style.transform='translate('+-x+'px,'+-y+'px)';
+orbs[2].style.transform='translate('+x*0.5+'px,'+-y*0.5+'px)';
 });
 
-// Form submit
-function submitForm(){
-  const name = document.getElementById('f-name').value.trim();
-  const city = document.getElementById('f-city').value.trim();
-  const phone = document.getElementById('f-phone').value.trim();
-  const email = document.getElementById('f-email').value.trim();
-  if(!name || !city || !phone){ alert('Veuillez remplir les champs obligatoires.'); return; }
-  const btn = document.getElementById('submitBtn');
-  btn.textContent = 'Envoi en cours...';
-  btn.disabled = true;
-  fetch('https://dziab.app.n8n.cloud/webhook/contact-vitrine', {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({restaurant:name, ville:city, telephone:phone, email:email})
-  }).then(()=>{
-    document.getElementById('contactForm').style.display='none';
-    document.getElementById('formSuccess').style.display='block';
-  }).catch(()=>{
-    document.getElementById('contactForm').style.display='none';
-    document.getElementById('formSuccess').style.display='block';
-  });
+/* NAVBAR SCROLL */
+window.addEventListener('scroll',function(){
+document.querySelector('.navbar').classList.toggle('scrolled',window.scrollY>50);
+});
+
+/* SCROLL REVEAL */
+const observer=new IntersectionObserver(function(entries){
+entries.forEach(function(entry){
+if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target)}
+});
+},{threshold:0.15,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(function(el){observer.observe(el)});
+
+/* COUNTER ANIMATION */
+const counterObserver=new IntersectionObserver(function(entries){
+entries.forEach(function(entry){
+if(entry.isIntersecting){
+const el=entry.target;
+const target=parseInt(el.getAttribute('data-count'));
+const suffix=el.textContent.includes('%')?'%':'';
+if(target===0){el.textContent='0'+suffix;counterObserver.unobserve(el);return}
+let current=0;
+const increment=target/60;
+const timer=setInterval(function(){
+current+=increment;
+if(current>=target){current=target;clearInterval(timer)}
+el.textContent=Math.round(current)+(suffix||'');
+},30);
+counterObserver.unobserve(el);
+}
+});
+},{threshold:0.5});
+document.querySelectorAll('.stat-number[data-count]').forEach(function(el){counterObserver.observe(el)});
+
+/* TILT EFFECT ON CARDS */
+document.querySelectorAll('.step-card,.adv-card,.pricing-card').forEach(function(card){
+card.addEventListener('mousemove',function(e){
+const rect=card.getBoundingClientRect();
+const x=(e.clientX-rect.left)/rect.width-0.5;
+const y=(e.clientY-rect.top)/rect.height-0.5;
+card.style.transform='perspective(1000px) rotateY('+x*8+'deg) rotateX('+-y*8+'deg) translateY(-4px)';
+});
+card.addEventListener('mouseleave',function(){
+card.style.transform='perspective(1000px) rotateY(0) rotateX(0) translateY(0)';
+card.style.transition='transform 0.5s ease';
+setTimeout(function(){card.style.transition='';},500);
+});
+});
+
+/* SMOOTH SCROLL */
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+a.addEventListener('click',function(e){
+e.preventDefault();
+const target=document.querySelector(this.getAttribute('href'));
+if(target){target.scrollIntoView({behavior:'smooth',block:'start'})}
+document.querySelector('.nav-links').classList.remove('open');
+});
+});
+
+/* FORM SUBMIT */
+function submitForm(e){
+e.preventDefault();
+const form=e.target;
+const data=new FormData(form);
+const obj={};
+data.forEach(function(v,k){obj[k]=v});
+const btn=form.querySelector('button[type="submit"]');
+btn.textContent='Envoi en cours...';
+btn.disabled=true;
+fetch('https://dziab.app.n8n.cloud/webhook/contact-vitrine',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify(obj)
+}).then(function(){
+form.style.display='none';
+document.getElementById('formSuccess').classList.add('show');
+}).catch(function(){
+form.style.display='none';
+document.getElementById('formSuccess').classList.add('show');
+});
 }
 </script>
 </body>
