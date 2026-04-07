@@ -87,7 +87,7 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
     .quick-btn{font-size:12px;padding:7px 12px}
 }
     .system-msg{background:rgba(255,180,0,0.08);color:var(--secondary);border:1px solid rgba(255,180,0,0.2);padding:16px;border-radius:14px;font-size:13px;text-align:center;align-self:center;margin:10px 0;white-space:pre-line}
-.offline-banner{display:none;background:#ff4444;color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:500;flex-shrink:0}
+.test-banner{display:none;background:#ff9800;color:#000;text-align:center;padding:8px;font-size:13px;font-weight:600;flex-shrink:0} .offline-banner{display:none;background:#ff4444;color:#fff;text-align:center;padding:8px;font-size:13px;font-weight:500;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -112,7 +112,8 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
     </div>
     <div class="context-banner" id="contextBanner"></div>
     <div class="order-banner" id="orderBanner"></div>
-    <div class="offline-banner" id="offlineBanner">Pas de connexion internet</div>
+    <div class="test-banner" id="testBanner">🧪 Mode test — Les commandes ne sont pas envoyées au restaurant</div>
+<div class="offline-banner" id="offlineBanner">Pas de connexion internet</div>
     <div class="chat-area" id="chatArea">
         <div class="skeleton" id="skeleton">
             <div class="skeleton-line"></div>
@@ -131,6 +132,7 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
 const WEBHOOK_URL='https://dziab.app.n8n.cloud/webhook/chatbot';
 const params=new URLSearchParams(window.location.search);
 const restoId=params.get('resto')||'';
+const testMode=params.get('mode')==='test';
 const STORAGE_KEY='iabot_session_'+restoId;
 
 let restoData=null;
@@ -551,6 +553,7 @@ async function sendOrderToWebhook(orderData){
             body:JSON.stringify({
                 resto_id:restoId,
                 message:'__order__',
+                mode:testMode?'test':'live',
                 order_data:orderData,
                 conversation_id:sessionId
             }),
@@ -640,6 +643,7 @@ async function sendMessage(){
             body:JSON.stringify({
                 resto_id:restoId,
                 message:text,
+                mode:testMode?'test':'live',
                 conversation_history:safeHistory,
                 client_phone:clientPhone,
                 context:conversationContext,
@@ -749,7 +753,8 @@ if(window.visualViewport){
         return;
     }
     
-    var sessionRestored=restoreSession();
+    if(testMode)document.getElementById('testBanner').style.display='block';
+var sessionRestored=restoreSession();
     
     if(sessionRestored){
         document.getElementById('skeleton').remove();
@@ -796,6 +801,7 @@ return;
             body:JSON.stringify({
                 resto_id:restoId,
                 message:'__init__',
+                mode:testMode?'test':'live',
                 conversation_history:JSON.stringify([{role:'user',content:'Bonjour'}]),
                 client_phone:'',
                 conversation_id:sessionId
