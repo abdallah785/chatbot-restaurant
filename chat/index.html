@@ -33,7 +33,12 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
 .info-actions .call-btn{background:var(--primary);color:#fff}
 .info-actions .map-btn{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.1)}
 .context-banner{display:none;background:rgba(255,255,255,0.04);padding:8px 16px;font-size:12px;color:var(--text-muted);border-bottom:1px solid rgba(255,255,255,0.05);flex-shrink:0}
-.order-banner{display:none;background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 80%,#000));padding:12px 16px;font-size:14px;color:#fff;font-weight:500;text-align:center;flex-shrink:0;animation:slideDown 0.3s ease}
+#orderBannersContainer{position:sticky;top:0;z-index:9999;width:100%;flex-shrink:0}
+    .order-banner{display:block;padding:12px 16px;font-size:14px;color:#fff;font-weight:500;text-align:center;flex-shrink:0;animation:slideDown 0.3s ease}
+    .order-banner.banner-orange{background:linear-gradient(135deg,#e67e22,#d35400)}
+    .order-banner.banner-green{background:linear-gradient(135deg,#27ae60,#1e8449)}
+    .order-banner.banner-red{background:linear-gradient(135deg,#e74c3c,#c0392b)}
+    .order-banner.banner-grey{background:linear-gradient(135deg,#7f8c8d,#566573)}
 @keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
 .chat-area{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 .msg-group{display:flex;flex-direction:column;gap:4px}
@@ -117,7 +122,7 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
         </div>
     </div>
     <div class="context-banner" id="contextBanner"></div>
-    <div class="order-banner" id="orderBanner"></div>
+    <div id="orderBannersContainer"></div>
     <div class="test-banner" id="testBanner">🧪 Mode test — Les commandes ne sont pas envoyées au restaurant</div>
 <div class="offline-banner" id="offlineBanner">Pas de connexion internet</div>
     <div class="validation-banner" id="validationBanner"></div>
@@ -336,13 +341,12 @@ function playSound(){
 
 /* ===== ORDER VALIDATION POLLING ===== */
     function showValidationBanner(type, message) {
-      var banner = document.getElementById('validationBanner');
-      banner.className = 'validation-banner ' + type;
-      banner.innerHTML = message;
-      banner.style.display = 'block';
+      var numero = confirmedOrder ? confirmedOrder.numero : '?';
+      var statusClass = type==='accepted'?'banner-green':type==='refused'?'banner-red':type==='expiree'?'banner-grey':'banner-orange';
+      showOrderBanner(numero, statusClass.replace('banner-',''), message);
     }
     function hideValidationBanner() {
-      document.getElementById('validationBanner').style.display = 'none';
+      // Banners now persist - no auto-hide
     }
     function startOrderPolling(orderId) {
       orderPolling.orderId = orderId;
@@ -389,15 +393,17 @@ function playSound(){
     function handleOrderValidation(status) {
       stopOrderPolling();
       if (status === 'acceptee') {
-        showValidationBanner('accepted', '\u2705 Commande accept\u00e9e ! Pr\u00eate dans ~15 min. Rendez-vous au comptoir.');
+        showValidationBanner('accepted', '\u2705 Commande #'+(confirmedOrder?confirmedOrder.numero:'?')+' accept\u00e9e \u2014 Pr\u00eate dans ~15-20 min \u2014 Rendez-vous au comptoir');
         addMessage('\u2705 Le restaurant a accept\u00e9 votre commande ! Elle sera pr\u00eate dans environ 15 minutes. Rendez-vous au comptoir.', 'bot');
         playSound();
+        showQuickButtons();
       } else if (status === 'refusee') {
-        showValidationBanner('refused', '\u274C Le restaurant ne peut pas prendre votre commande pour le moment.');
+        showValidationBanner('refused', '\u274C Commande #'+(confirmedOrder?confirmedOrder.numero:'?')+' refus\u00e9e \u2014 Passez au comptoir');
         addMessage('Le restaurant ne peut pas prendre votre commande pour le moment. Veuillez r\u00e9essayer plus tard.', 'bot');
         hideOrderBanner();
         confirmedOrder = null;
         playSound();
+      showQuickButtons();
       } else if (status === 'expiree' || status === 'annulee') {
         showValidationBanner('timeout', '\u23f0 Le restaurant n\u2019a pas pu confirmer votre commande.');
         addMessage('Le restaurant n\u2019a pas pu confirmer votre commande. Veuillez r\u00e9essayer ou passer directement au comptoir.', 'bot');
@@ -434,14 +440,19 @@ function displayOrderRecap(orderData){
     saveSession();
 }
 
-function showOrderBanner(numero,temps){
-    var banner=document.getElementById('orderBanner');
-    banner.innerHTML='\ud83c\udf54 Commande #'+numero+' \u2014 En cours \u2014 ~'+temps;
-    banner.style.display='block';
+function showOrderBanner(numero,status,text){
+    var container=document.getElementById('orderBannersContainer');
+    var existing=document.getElementById('banner-'+numero);
+    if(existing){existing.className='order-banner banner-'+status;existing.textContent=text;return;}
+    var b=document.createElement('div');
+    b.id='banner-'+numero;
+    b.className='order-banner banner-'+status;
+    b.textContent=text;
+    container.appendChild(b);
 }
 
-function hideOrderBanner(){
-    document.getElementById('orderBanner').style.display='none';
+function hideOrderBanner(numero){
+    if(numero){var b=document.getElementById('banner-'+numero);if(b)b.remove();}
 }
 
 function showOrderConfirmation(numero,temps,orderId){
@@ -457,8 +468,9 @@ function showOrderConfirmation(numero,temps,orderId){
     saveSession();
     if(orderId){
       startOrderPolling(orderId);
+      showQuickButtons();
     }else{
-      showValidationBanner('accepted','\u2705 Commande confirm\u00e9e ! ~'+temps+' \u2014 Rendez-vous au comptoir.');
+      showValidationBanner('accepted','\u2705 Commande #'+numero+' confirm\u00e9e ! ~'+temps+' \u2014 Rendez-vous au comptoir.');
       setTimeout(function(){
         addMessage('Autre chose ? Vous pouvez continuer \u00e0 commander ou poser une question.','bot');
         document.getElementById('userInput').disabled=false;
