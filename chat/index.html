@@ -443,11 +443,11 @@ function displayOrderRecap(orderData){
 function showOrderBanner(numero,status,text){
     var container=document.getElementById('orderBannersContainer');
     var existing=document.getElementById('banner-'+numero);
-    if(existing){existing.className='order-banner banner-'+status;existing.textContent=text;return;}
+    if(existing){existing.className='order-banner banner-'+status;existing.innerHTML=text;return;}
     var b=document.createElement('div');
     b.id='banner-'+numero;
     b.className='order-banner banner-'+status;
-    b.textContent=text;
+    b.innerHTML=text;
     container.appendChild(b);
 }
 
