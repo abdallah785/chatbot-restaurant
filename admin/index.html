@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin — Chatbot Restaurants</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: #0a0e1a; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; padding-bottom: 80px; }
+  .hidden { display: none !important; }
+
+  #login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+  #login .box { background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 32px 24px; width: 100%; max-width: 380px; }
+  #login h1 { font-size: 22px; color: #14b8a6; margin-bottom: 8px; text-align: center; }
+  #login p { color: #94a3b8; font-size: 14px; text-align: center; margin-bottom: 24px; }
+  #login input { width: 100%; padding: 14px 16px; font-size: 16px; background: #0a0e1a; color: #e2e8f0; border: 1px solid #334155; border-radius: 10px; outline: none; }
+  #login input:focus { border-color: #14b8a6; }
+  #login button { width: 100%; padding: 14px; margin-top: 12px; background: #14b8a6; color: #0a0e1a; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+  #login button:active { background: #0d9488; }
+  #login .err { color: #ef4444; font-size: 13px; text-align: center; margin-top: 12px; min-height: 18px; }
+
+  header { position: sticky; top: 0; z-index: 10; background: rgba(10, 14, 26, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #1f2937; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  header h1 { font-size: 18px; color: #14b8a6; }
+  header .header-btns { display: flex; gap: 6px; }
+  header button { background: none; border: 1px solid #334155; color: #94a3b8; padding: 6px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; }
+  header button:active { background: #1f2937; }
+
+  .stats { padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 14px 10px; text-align: center; }
+  .stat .val { font-size: 22px; font-weight: 700; color: #14b8a6; }
+  .stat .lbl { font-size: 11px; color: #94a3b8; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .tabs { display: flex; padding: 0 16px; gap: 4px; border-bottom: 1px solid #1f2937; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab { padding: 12px 16px; background: none; border: none; color: #94a3b8; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; }
+  .tab.active { color: #14b8a6; border-bottom-color: #14b8a6; }
+
+  main { padding: 16px; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .card { background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+  .card h3 { font-size: 16px; margin-bottom: 6px; color: #f1f5f9; }
+  .card .meta { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+  .card .meta span { margin-right: 12px; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+  .badge.pending { background: #78350f; color: #fbbf24; }
+  .badge.valid { background: #064e3b; color: #34d399; }
+  .badge.refused { background: #7f1d1d; color: #f87171; }
+  .badge.active { background: #164e63; color: #67e8f9; }
+  .badge.essai { background: #312e81; color: #a5b4fc; }
+
+  .card .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .btn { padding: 10px 14px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; flex: 1; min-width: 80px; }
+  .btn-primary { background: #14b8a6; color: #0a0e1a; }
+  .btn-success { background: #059669; color: white; }
+  .btn-danger { background: #dc2626; color: white; }
+  .btn-ghost { background: #1f2937; color: #e2e8f0; border: 1px solid #334155; }
+
+  .empty { text-align: center; padding: 40px 20px; color: #64748b; }
+  .loading { text-align: center; padding: 30px; color: #94a3b8; }
+
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; padding: 20px; overflow-y: auto; }
+  .modal-bg.open { display: flex; align-items: flex-start; justify-content: center; }
+  .modal { background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 20px; width: 100%; max-width: 500px; margin: 20px 0; }
+  .modal h2 { color: #14b8a6; font-size: 18px; margin-bottom: 16px; }
+  .modal label { display: block; font-size: 12px; color: #94a3b8; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .modal input, .modal select, .modal textarea { width: 100%; padding: 10px 12px; background: #0a0e1a; color: #e2e8f0; border: 1px solid #334155; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; }
+  .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: #14b8a6; }
+  .modal textarea { min-height: 70px; resize: vertical; }
+  .modal .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+  .modal .modal-actions .btn { flex: 1; }
+
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #111827; border: 1px solid #14b8a6; color: #14b8a6; padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500; z-index: 1000; opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); max-width: 90%; text-align: center; }
+  #toast.show { opacity: 1; }
+  #toast.error { border-color: #ef4444; color: #ef4444; }
+
+  .photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+  .photos-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; border: 1px solid #334155; }
+  .photo-section { margin-top: 10px; }
+  .photo-section h4 { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+
+  .detail-row { display: flex; padding: 8px 0; border-bottom: 1px solid #1f2937; font-size: 14px; }
+  .detail-row strong { color: #94a3b8; min-width: 120px; font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .detail-row span { color: #e2e8f0; flex: 1; word-break: break-word; }
+
+  .info-banner { background: #1e3a5f; border: 1px solid #1e40af; color: #93c5fd; padding: 10px 14px; border-radius: 8px; font-size: 12px; margin: 12px 16px; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h1>🔒 Admin Dashboard</h1>
+    <p>Chatbot Restaurants</p>
+    <input type="password" id="pwd" placeholder="Mot de passe" autocomplete="current-password">
+    <button onclick="doLogin()">Entrer</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>🍽️ Admin Dashboard</h1>
+    <div class="header-btns">
+      <button onclick="resetTokens()" title="Réinitialiser les tokens stockés">🔑 Reset</button>
+      <button onclick="loadAll()" title="Recharger">🔄</button>
+      <button onclick="doLogout()">Sortir</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="val" id="sDemandes">–</div><div class="lbl">Demandes</div></div>
+    <div class="stat"><div class="val" id="sRestos">–</div><div class="lbl">Restos actifs</div></div>
+    <div class="stat"><div class="val" id="sCA">–</div><div class="lbl">CA du jour</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="demandes" onclick="switchTab('demandes')">📥 Demandes</button>
+    <button class="tab" data-tab="restos" onclick="switchTab('restos')">🏪 Restos</button>
+    <button class="tab" data-tab="creer" onclick="switchTab('creer')">➕ Créer</button>
+  </div>
+
+  <main>
+    <div class="section active" id="sec-demandes">
+      <div id="listDemandes" class="loading">Chargement...</div>
+    </div>
+    <div class="section" id="sec-restos">
+      <div id="listRestos" class="loading">Chargement...</div>
+    </div>
+    <div class="section" id="sec-creer">
+      <form id="formCreer" onsubmit="createRestoManual(event)">
+        <div class="card">
+          <h3>Créer un resto manuellement</h3>
+          <label>Nom du resto *</label>
+          <input name="nom" required placeholder="Ex: Le Beldi">
+          <label>Ville *</label>
+          <input name="ville" required placeholder="Paris">
+          <label>Email du patron *</label>
+          <input name="email_resto" type="email" required>
+          <label>Téléphone</label>
+          <input name="telephone" type="tel">
+          <label>Type de cuisine</label>
+          <input name="type_cuisine" placeholder="Marocain, Libanais…">
+          <label>Telegram Chat ID du patron *</label>
+          <input name="telegram_chat_id" required placeholder="123456789">
+          <label>Mode paiement</label>
+          <select name="mode_paiement">
+            <option value="comptoir">Comptoir</option>
+            <option value="en_ligne">En ligne</option>
+            <option value="les_deux">Les deux</option>
+          </select>
+          <label>Style</label>
+          <select name="style">
+            <option value="familial">Familial</option>
+            <option value="decontracte">Décontracté</option>
+            <option value="chic">Chic</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" name="halal" checked style="width:auto;"> Halal</label>
+          <div class="modal-actions">
+            <button type="submit" class="btn btn-primary">Créer le resto</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<div class="modal-bg" id="modalDemande">
+  <div class="modal">
+    <h2 id="mdTitre">Demande</h2>
+    <div id="mdBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-success" onclick="validerDemande()">✓ Valider & Activer</button>
+      <button class="btn btn-danger" onclick="refuserDemande()">✗ Refuser</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalDemande')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalResto">
+  <div class="modal">
+    <h2 id="mrTitre">Resto</h2>
+    <div id="mrBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="sendChatbotLink()">📱 Envoyer lien via Telegram</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modalResto')">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===== CONFIG =====
+const CONFIG = {
+  PASSWORD: 'iabot1019',
+  AIRTABLE_BASE: 'appuCnzeiV1MZKAdt',
+  TBL_RESTOS: 'tbl2SWGCgUICbY0Fv',
+  TBL_ONBOARDING: 'tblwT6Vo60jWnFx7S',
+  TBL_COMMANDES: 'tblIq8gZepPPpoMwX',
+  CHATBOT_BASE: 'https://chat.iabot.live/chat/',
+  LS_PAT: 'adm_airtable_pat',
+  LS_TG: 'adm_telegram_token'
+};
+
+let state = {
+  demandes: [],
+  restos: [],
+  currentDemandeId: null,
+  currentResto: null,
+  airtable_pat: null,
+  telegram_token: null
+};
+
+// ===== TOKEN MANAGEMENT =====
+function getAirtablePAT() {
+  let pat = localStorage.getItem(CONFIG.LS_PAT);
+  if (!pat) {
+    pat = prompt("Première utilisation : collez votre Airtable PAT\n(scopes data.records:read/write, schema.bases:read)\nIl sera stocké dans ce navigateur uniquement.");
+    if (pat && pat.startsWith('pat')) {
+      localStorage.setItem(CONFIG.LS_PAT, pat);
+    } else {
+      return null;
+    }
+  }
+  state.airtable_pat = pat;
+  return pat;
+}
+
+function getTelegramToken() {
+  let tok = localStorage.getItem(CONFIG.LS_TG);
+  if (!tok) {
+    tok = prompt("Collez le token du bot Telegram (Agent)\nFormat: 12345:AA...\nStocké dans ce navigateur uniquement.\n\nLaissez vide si vous ne voulez pas envoyer de messages.");
+    if (tok && tok.includes(':')) {
+      localStorage.setItem(CONFIG.LS_TG, tok);
+    } else {
+      return null;
+    }
+  }
+  state.telegram_token = tok;
+  return tok;
+}
+
+function resetTokens() {
+  if (!confirm("Réinitialiser les tokens Airtable + Telegram ?\nVous devrez les retaper au prochain chargement.")) return;
+  localStorage.removeItem(CONFIG.LS_PAT);
+  localStorage.removeItem(CONFIG.LS_TG);
+  state.airtable_pat = null;
+  state.telegram_token = null;
+  toast('Tokens effacés. Rechargement...');
+  setTimeout(() => location.reload(), 800);
+}
+
+// ===== AUTH =====
+function doLogin() {
+  const pwd = document.getElementById('pwd').value;
+  if (pwd === CONFIG.PASSWORD) {
+    sessionStorage.setItem('admin_auth', '1');
+    showApp();
+  } else {
+    document.getElementById('loginErr').textContent = 'Mot de passe incorrect';
+    document.getElementById('pwd').value = '';
+  }
+}
+function doLogout() {
+  sessionStorage.removeItem('admin_auth');
+  location.reload();
+}
+function checkAuth() {
+  if (sessionStorage.getItem('admin_auth') === '1') showApp();
+}
+function showApp() {
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  // Get tokens (prompt if needed)
+  const pat = getAirtablePAT();
+  if (!pat) {
+    document.getElementById('listDemandes').innerHTML = '<div class="empty">Pas de PAT Airtable. Cliquez sur 🔑 Reset pour réessayer.</div>';
+    return;
+  }
+  getTelegramToken(); // Optional
+  loadAll();
+}
+
+// ===== UTILS =====
+function toast(msg, isError) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (isError ? ' error' : '');
+  setTimeout(() => { el.className = ''; }, 3500);
+}
+function esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function formatDate(iso) {
+  if (!iso) return '–';
+  try { return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }); }
+  catch(e) { return iso; }
+}
+function formatEUR(n) {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n || 0);
+}
+
+// ===== AIRTABLE API =====
+function atHeaders() {
+  return {
+    'Authorization': 'Bearer ' + state.airtable_pat,
+    'Content-Type': 'application/json'
+  };
+}
+
+async function atList(tableId, params) {
+  const qs = params ? ('?' + new URLSearchParams(params).toString()) : '';
+  const url = 'https://api.airtable.com/v0/' + CONFIG.AIRTABLE_BASE + '/' + tableId + qs;
+  let all = [];
+  let offset = null;
+  do {
+    const pagedUrl = offset ? (url + (qs ? '&' : '?') + 'offset=' + offset) : url;
+    const r = await fetch(pagedUrl, { headers: atHeaders() });
+    if (r.status === 401 || r.status === 403) {
+      localStorage.removeItem(CONFIG.LS_PAT);
+      throw new Error('PAT Airtable invalide. Rechargez et retapez.');
+    }
+    if (!r.ok) throw new Error('Airtable ' + r.status);
+    const d = await r.json();
+    all = all.concat(d.records);
+    offset = d.offset;
+  } while (offset);
+  return all;
+}
+async function atCreate(tableId, fields) {
+  const r = await fetch('https://api.airtable.com/v0/' + CONFIG.AIRTABLE_BASE + '/' + tableId, {
+    method: 'POST', headers: atHeaders(),
+    body: JSON.stringify({ fields, typecast: true })
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error('Airtable create: ' + txt.slice(0, 200));
+  }
+  return r.json();
+}
+async function atUpdate(tableId, recordId, fields) {
+  const r = await fetch('https://api.airtable.com/v0/' + CONFIG.AIRTABLE_BASE + '/' + tableId + '/' + recordId, {
+    method: 'PATCH', headers: atHeaders(),
+    body: JSON.stringify({ fields, typecast: true })
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error('Airtable update: ' + txt.slice(0, 200));
+  }
+  return r.json();
+}
+
+// ===== TELEGRAM =====
+async function sendTelegram(chatId, text) {
+  if (!state.telegram_token) {
+    state.telegram_token = getTelegramToken();
+    if (!state.telegram_token) throw new Error('Pas de token Telegram');
+  }
+  const url = 'https://api.telegram.org/bot' + state.telegram_token + '/sendMessage';
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: 'HTML' })
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    if (txt.includes('bot token')) {
+      localStorage.removeItem(CONFIG.LS_TG);
+      state.telegram_token = null;
+    }
+    throw new Error('Telegram: ' + txt.slice(0, 200));
+  }
+  return r.json();
+}
+
+// ===== LOAD =====
+async function loadAll() {
+  if (!state.airtable_pat) {
+    const pat = getAirtablePAT();
+    if (!pat) return;
+  }
+  document.getElementById('listDemandes').className = 'loading';
+  document.getElementById('listDemandes').textContent = 'Chargement...';
+  document.getElementById('listRestos').className = 'loading';
+  document.getElementById('listRestos').textContent = 'Chargement...';
+  try {
+    const [demandes, restos, commandes] = await Promise.all([
+      atList(CONFIG.TBL_ONBOARDING),
+      atList(CONFIG.TBL_RESTOS),
+      atList(CONFIG.TBL_COMMANDES, { filterByFormula: "IS_SAME({date_commande}, TODAY(), 'day')" })
+    ]);
+    state.demandes = demandes;
+    state.restos = restos;
+    renderDemandes();
+    renderRestos();
+    renderStats(demandes, restos, commandes);
+    toast('✓ ' + demandes.length + ' demandes, ' + restos.length + ' restos');
+  } catch(e) {
+    toast('Erreur: ' + e.message, true);
+    document.getElementById('listDemandes').innerHTML = '<div class="empty">Erreur : ' + esc(e.message) + '</div>';
+    console.error(e);
+  }
+}
+
+function renderStats(demandes, restos, commandes) {
+  const pending = demandes.filter(d => (d.fields.statut || 'en_attente_validation') === 'en_attente_validation').length;
+  const actifs = restos.filter(r => ['actif','essai'].includes(r.fields.statut)).length;
+  const validStatuts = ['confirmee','en_preparation','prete','recuperee','acceptee'];
+  const ca = commandes
+    .filter(c => validStatuts.includes(c.fields.statut_commande))
+    .reduce((s, c) => s + (c.fields.total || 0), 0);
+  document.getElementById('sDemandes').textContent = pending;
+  document.getElementById('sRestos').textContent = actifs;
+  document.getElementById('sCA').textContent = formatEUR(ca);
+}
+
+function renderDemandes() {
+  const list = document.getElementById('listDemandes');
+  list.className = '';
+  const pending = state.demandes.filter(d => (d.fields.statut || 'en_attente_validation') === 'en_attente_validation');
+  const others = state.demandes.filter(d => (d.fields.statut || 'en_attente_validation') !== 'en_attente_validation');
+  
+  if (state.demandes.length === 0) {
+    list.innerHTML = '<div class="empty">Aucune demande.</div>';
+    return;
+  }
+  
+  let html = '';
+  if (pending.length > 0) {
+    html += '<h3 style="color:#fbbf24;margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">⏳ En attente (' + pending.length + ')</h3>';
+    pending.forEach(d => { html += cardDemande(d); });
+  }
+  if (others.length > 0) {
+    html += '<h3 style="color:#64748b;margin:20px 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Traitées (' + others.length + ')</h3>';
+    others.forEach(d => { html += cardDemande(d); });
+  }
+  list.innerHTML = html;
+}
+
+function cardDemande(d) {
+  const f = d.fields;
+  const statut = f.statut || 'en_attente_validation';
+  let badgeClass = 'pending';
+  if (statut === 'valide' || statut === 'active') badgeClass = 'valid';
+  else if (statut === 'refuse') badgeClass = 'refused';
+  return '<div class="card" onclick="openDemande(\'' + d.id + '\')">'
+    + '<h3>' + esc(f.nom_resto || '(sans nom)') + '</h3>'
+    + '<div class="meta"><span class="badge ' + badgeClass + '">' + esc(statut) + '</span>'
+    + '<span>📅 ' + formatDate(f.date_soumission) + '</span></div>'
+    + '<div class="meta"><span>📧 ' + esc(f.email_contact || '–') + '</span></div>'
+    + '</div>';
+}
+
+function renderRestos() {
+  const list = document.getElementById('listRestos');
+  list.className = '';
+  const actifs = state.restos.filter(r => ['actif','essai'].includes(r.fields.statut));
+  const autres = state.restos.filter(r => !['actif','essai'].includes(r.fields.statut));
+  if (actifs.length === 0 && autres.length === 0) {
+    list.innerHTML = '<div class="empty">Aucun resto.</div>';
+    return;
+  }
+  let html = '';
+  if (actifs.length > 0) {
+    html += '<h3 style="color:#14b8a6;margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">✓ Actifs / Essai (' + actifs.length + ')</h3>';
+    actifs.forEach(r => { html += cardResto(r); });
+  }
+  if (autres.length > 0) {
+    html += '<h3 style="color:#64748b;margin:20px 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">Autres (' + autres.length + ')</h3>';
+    autres.slice(0, 20).forEach(r => { html += cardResto(r); });
+  }
+  list.innerHTML = html;
+}
+
+function cardResto(r) {
+  const f = r.fields;
+  const badgeClass = f.statut === 'actif' ? 'active' : (f.statut === 'essai' ? 'essai' : 'refused');
+  return '<div class="card" onclick="openResto(\'' + r.id + '\')">'
+    + '<h3>' + esc(f.nom || '(sans nom)') + '</h3>'
+    + '<div class="meta"><span class="badge ' + badgeClass + '">' + esc(f.statut || '?') + '</span>'
+    + '<span>🆔 ' + esc(f.resto_id || '–') + '</span></div>'
+    + '<div class="meta"><span>📍 ' + esc(f.ville || '–') + '</span>'
+    + '<span>🍽️ ' + esc(f.type_cuisine || '–') + '</span></div>'
+    + '</div>';
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === 'sec-' + name));
+}
+
+// ===== DEMANDE DETAIL =====
+function openDemande(id) {
+  const d = state.demandes.find(x => x.id === id);
+  if (!d) return;
+  state.currentDemandeId = id;
+  const f = d.fields;
+  document.getElementById('mdTitre').textContent = f.nom_resto || 'Demande';
+  
+  const rows = [
+    ['Statut', (f.statut || 'en_attente_validation')],
+    ['Soumis le', formatDate(f.date_soumission)],
+    ['Email', f.email_contact],
+    ['Téléphone', f.telephone],
+    ['Telegram', f.telegram_contact],
+    ['Adresse', f.adresse],
+    ['Style', f.style],
+    ['Halal', f.halal_certif],
+    ['Allergènes', f.allergenes],
+    ['Moyens paiement', Array.isArray(f.moyens_paiement) ? f.moyens_paiement.join(', ') : f.moyens_paiement],
+    ['Services', Array.isArray(f.services) ? f.services.join(', ') : f.services],
+    ['Temps prépa', f.temps_preparation],
+    ['Couleurs', (f.couleur_primaire || '?') + ' / ' + (f.couleur_secondaire || '?')]
+  ];
+  
+  let html = '';
+  rows.forEach(pair => {
+    const k = pair[0], v = pair[1];
+    if (v) html += '<div class="detail-row"><strong>' + esc(k) + '</strong><span>' + esc(v) + '</span></div>';
+  });
+  
+  ['logo', 'photos_devanture', 'photos_plats', 'photos_menu_papier'].forEach(fld => {
+    const photos = f[fld];
+    if (Array.isArray(photos) && photos.length > 0) {
+      html += '<div class="photo-section"><h4>' + fld.replace(/_/g, ' ') + ' (' + photos.length + ')</h4><div class="photos-grid">';
+      photos.forEach(p => {
+        const thumb = (p.thumbnails && p.thumbnails.large && p.thumbnails.large.url) || p.url;
+        html += '<a href="' + esc(p.url) + '" target="_blank"><img src="' + esc(thumb) + '" alt=""></a>';
+      });
+      html += '</div></div>';
+    }
+  });
+  
+  html += '<label style="display:block;margin-top:16px;font-size:12px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Notes admin</label>';
+  html += '<textarea id="mdNotes" style="width:100%;padding:10px;background:#0a0e1a;color:#e2e8f0;border:1px solid #334155;border-radius:8px;min-height:60px;margin-top:4px;">' + esc(f.admin_notes || '') + '</textarea>';
+  
+  document.getElementById('mdBody').innerHTML = html;
+  document.getElementById('modalDemande').classList.add('open');
+}
+
+async function validerDemande() {
+  const id = state.currentDemandeId;
+  if (!id) return;
+  const d = state.demandes.find(x => x.id === id);
+  if (!d) return;
+  const notes = document.getElementById('mdNotes').value;
+  
+  if (!confirm('Valider cette demande ?\nUn nouveau resto sera créé avec statut "essai".')) return;
+  
+  toast('Validation en cours...');
+  try {
+    const f = d.fields;
+    const slug = (f.nom_resto || 'resto').toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
+    const rand = Math.random().toString(36).slice(2, 7);
+    const resto_id = slug + '-' + rand;
+    
+    const halal = !!f.halal_certif;
+    const style = f.style || 'familial';
+    let mode_paiement = 'comptoir';
+    if (Array.isArray(f.moyens_paiement)) {
+      if (f.moyens_paiement.length > 1) mode_paiement = 'les_deux';
+      else if (f.moyens_paiement.includes('CB')) mode_paiement = 'en_ligne';
+    }
+    
+    const restoFields = {
+      resto_id: resto_id,
+      nom: f.nom_resto || '',
+      email_resto: f.email_contact || '',
+      telephone: f.telephone || '',
+      adresse: f.adresse || '',
+      telegram_chat_id: (f.telegram_contact || '').replace(/^@/, ''),
+      statut: 'essai',
+      commande_active: true,
+      halal: halal,
+      style: style,
+      mode_paiement: mode_paiement,
+      couleur_principale: f.couleur_primaire || '',
+      couleur_secondaire: f.couleur_secondaire || '',
+      allergenes: f.allergenes || '',
+      horaires: f.horaires_json || '',
+      temps_preparation: f.temps_preparation || '',
+      date_essai: new Date().toISOString()
+    };
+    await atCreate(CONFIG.TBL_RESTOS, restoFields);
+    
+    const lien = CONFIG.CHATBOT_BASE + '?resto=' + resto_id;
+    await atUpdate(CONFIG.TBL_ONBOARDING, id, {
+      statut: 'active',
+      date_validation: new Date().toISOString(),
+      admin_notes: notes,
+      resto_id: resto_id,
+      lien_chatbot: lien
+    });
+    
+    toast('✓ Resto créé : ' + resto_id);
+    closeModal('modalDemande');
+    await loadAll();
+  } catch(e) {
+    toast('Erreur: ' + e.message, true);
+    console.error(e);
+  }
+}
+
+async function refuserDemande() {
+  const id = state.currentDemandeId;
+  if (!id) return;
+  const notes = document.getElementById('mdNotes').value;
+  if (!notes.trim()) { toast('Indiquez une raison dans les notes', true); return; }
+  if (!confirm('Refuser cette demande ?')) return;
+  try {
+    await atUpdate(CONFIG.TBL_ONBOARDING, id, {
+      statut: 'refuse',
+      date_validation: new Date().toISOString(),
+      admin_notes: notes
+    });
+    toast('Demande refusée');
+    closeModal('modalDemande');
+    await loadAll();
+  } catch(e) {
+    toast('Erreur: ' + e.message, true);
+  }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ===== RESTO DETAIL =====
+function openResto(id) {
+  const r = state.restos.find(x => x.id === id);
+  if (!r) return;
+  state.currentResto = r;
+  const f = r.fields;
+  document.getElementById('mrTitre').textContent = f.nom || 'Resto';
+  
+  const lien = CONFIG.CHATBOT_BASE + '?resto=' + (f.resto_id || '');
+  
+  const rows = [
+    ['Resto ID', f.resto_id],
+    ['Statut', f.statut],
+    ['Ville', f.ville],
+    ['Email', f.email_resto],
+    ['Téléphone', f.telephone],
+    ['Cuisine', f.type_cuisine],
+    ['Telegram Chat', f.telegram_chat_id],
+    ['Commande active', f.commande_active ? '✓ Oui' : '✗ Non'],
+    ['Mode paiement', f.mode_paiement],
+    ['Style', f.style],
+    ['Halal', f.halal ? '✓' : '✗'],
+    ['Date essai', formatDate(f.date_essai)],
+    ['Essai conv.', f.essai_nb_conversations],
+    ['Essai cmds', f.essai_nb_commandes]
+  ];
+  
+  let html = '';
+  rows.forEach(pair => {
+    const k = pair[0], v = pair[1];
+    if (v !== undefined && v !== null && v !== '') {
+      html += '<div class="detail-row"><strong>' + esc(k) + '</strong><span>' + esc(v) + '</span></div>';
+    }
+  });
+  
+  if (f.resto_id) {
+    html += '<div class="detail-row"><strong>Lien chatbot</strong><span><a href="' + esc(lien) + '" target="_blank" style="color:#14b8a6;word-break:break-all;">' + esc(lien) + '</a></span></div>';
+  }
+  
+  document.getElementById('mrBody').innerHTML = html;
+  document.getElementById('modalResto').classList.add('open');
+}
+
+async function sendChatbotLink() {
+  const r = state.currentResto;
+  if (!r) return;
+  const f = r.fields;
+  const chatId = f.telegram_chat_id;
+  if (!chatId) { toast('Pas de Telegram Chat ID', true); return; }
+  if (!f.resto_id) { toast('Pas de resto_id', true); return; }
+  
+  const lien = CONFIG.CHATBOT_BASE + '?resto=' + f.resto_id;
+  const msg = '🎉 <b>Bienvenue ' + (f.nom || '') + ' !</b>\n\nVotre chatbot est prêt. Voici votre lien à partager à vos clients :\n\n' + lien + '\n\n📱 Vous pouvez aussi afficher un QR code pointant vers ce lien dans votre vitrine.\n\nBonne continuation ! 🚀';
+  
+  if (!confirm('Envoyer le lien chatbot à ' + (f.nom || '') + ' ?\nChat ID : ' + chatId)) return;
+  
+  try {
+    await sendTelegram(chatId, msg);
+    toast('✓ Lien envoyé sur Telegram');
+    closeModal('modalResto');
+  } catch(e) {
+    toast('Erreur: ' + e.message, true);
+  }
+}
+
+// ===== CREATE MANUAL =====
+async function createRestoManual(ev) {
+  ev.preventDefault();
+  const form = ev.target;
+  const fd = new FormData(form);
+  const nom = fd.get('nom');
+  const slug = nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30);
+  const rand = Math.random().toString(36).slice(2, 7);
+  const resto_id = slug + '-' + rand;
+  
+  const fields = {
+    resto_id: resto_id,
+    nom: nom,
+    ville: fd.get('ville'),
+    email_resto: fd.get('email_resto'),
+    telephone: fd.get('telephone') || '',
+    type_cuisine: fd.get('type_cuisine') || '',
+    telegram_chat_id: fd.get('telegram_chat_id'),
+    mode_paiement: fd.get('mode_paiement'),
+    style: fd.get('style'),
+    halal: fd.get('halal') === 'on',
+    statut: 'essai',
+    commande_active: true,
+    date_essai: new Date().toISOString()
+  };
+  
+  try {
+    await atCreate(CONFIG.TBL_RESTOS, fields);
+    toast('✓ Resto créé : ' + resto_id);
+    form.reset();
+    await loadAll();
+    switchTab('restos');
+  } catch(e) {
+    toast('Erreur: ' + e.message, true);
+  }
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', function() {
+  checkAuth();
+  document.getElementById('pwd').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.querySelectorAll('.modal-bg').forEach(function(m) {
+    m.addEventListener('click', function(e) {
+      if (e.target === m) m.classList.remove('open');
+    });
+  });
+});
+</script>
+</body>
+</html>
