@@ -1087,7 +1087,7 @@ function parseMenuText(text) {
   var reColon   = /^\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿ0-9 \-&'’]{2,40})\s*:\s*$/;
   var reEqual   = /^\s*=+\s*(.+?)\s*=+\s*$/;
   var reDash    = /^\s*-{2,}\s*(.+?)\s*-{2,}\s*$/;
-  var rePlat = /^\s*[\u2022\u2023\u25E6\u00B7\*\-]?\s*(.+?)\s+[\-–—:]\s*([0-9]{1,3}(?:[.,][0-9]{1,2})?)\s*(?:€|EUR|euros?)\b\s*(?:[\-–—]\s*(.+?))?\s*$/i;
+  var rePlat = /^\s*[\u2022\u2023\u25E6\u00B7\*\-]?\s*(.+?)\s*[\-–—:]\s*([0-9]{1,3}(?:[.,][0-9]{1,2})?)\s*(?:€|EUR|euros?)\s*(?:[\-–—]\s*(.+?))?\s*$/i;
   var rePhoto = /\bphoto\s*[:=]\s*(https?:\/\/[^\s]+)/i;
 
   for (var i = 0; i < lines.length; i++) {
@@ -1427,6 +1427,13 @@ async function submitCartOrder() {
 }
 
 function tryInitCatalogAfterReady() {
+  // Wait for photos-defaults.js (defer) if not yet loaded
+  if (typeof window.IABOT_PHOTOS === 'undefined') {
+    if (!window.__catalog_wait_count) window.__catalog_wait_count = 0;
+    if (window.__catalog_wait_count++ < 30) {
+      return setTimeout(tryInitCatalogAfterReady, 100);
+    }
+  }
   if (detectDemoMode()) {
     if (!restoData) {
       restoData = { nom: 'Démo Restaurant', couleur_principale: '#FF6B00', couleur_secondaire: '#FFD700', menu: '' };
@@ -1467,11 +1474,16 @@ document.addEventListener('DOMContentLoaded', function(){
 
 /* ===== INITIALIZATION ===== */
 (async function init(){
-    if(!restoId){
-        document.getElementById('skeleton').remove();
-        showError('Restaurant introuvable. V\u00e9rifiez le lien.');
-        return;
-    }
+    if(!restoId && !detectDemoMode()){
+            document.getElementById('skeleton').remove();
+            showError('Restaurant introuvable. Vérifiez le lien.');
+            return;
+        }
+        if(!restoId && detectDemoMode()){
+            var __sk=document.getElementById('skeleton'); if(__sk) __sk.remove();
+            try{ renderQuickBtns(''); }catch(e){}
+            return;
+        }
     
     if(testMode)document.getElementById('testBanner').style.display='block';
 var sessionRestored=restoreSession();
