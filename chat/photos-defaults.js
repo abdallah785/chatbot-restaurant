@@ -1,5 +1,7 @@
 // chat/photos-defaults.js
-// Photos par defaut HALAL-SAFE (Pexels libre de droit) + detection auto par mot-cle.
+// Photos par defaut: placeholder neutre par defaut (halal-safe).
+// On garde uniquement les photos clairement non-risquees (boissons, eau, jus, frites).
+// Les patrons uploaderont leurs vraies photos plus tard via le dashboard admin ou Airtable.
 (function (global) {
   "use strict";
 
@@ -10,34 +12,43 @@
       '<stop offset="0%" stop-color="#0f3a3a"/><stop offset="100%" stop-color="#062929"/>' +
       '</linearGradient></defs>' +
       '<rect width="600" height="600" fill="url(#g)"/>' +
-      '<text x="50%" y="50%" font-size="240" text-anchor="middle" dominant-baseline="central" fill="rgba(255,255,255,0.85)">DISH</text>' +
+      '<text x="50%" y="50%" font-size="220" text-anchor="middle" dominant-baseline="central" fill="rgba(255,255,255,0.85)" font-family="-apple-system,Segoe UI Emoji,Apple Color Emoji,sans-serif">' +
+      '\uD83C\uDF7D\uFE0F</text>' +
       '</svg>'
     );
 
-  var DEFAULT_PHOTOS = {
-    burger:  "https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=600",
-    taco:    "https://images.pexels.com/photos/2092507/pexels-photo-2092507.jpeg?auto=compress&cs=tinysrgb&w=600",
-    naan:    "https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg?auto=compress&cs=tinysrgb&w=600",
-    pizza:   "https://images.pexels.com/photos/845811/pexels-photo-845811.jpeg?auto=compress&cs=tinysrgb&w=600",
-    poulet:  "https://images.pexels.com/photos/2338407/pexels-photo-2338407.jpeg?auto=compress&cs=tinysrgb&w=600",
-    riz:     "https://images.pexels.com/photos/723198/pexels-photo-723198.jpeg?auto=compress&cs=tinysrgb&w=600",
-    kebab:   "https://images.pexels.com/photos/4958792/pexels-photo-4958792.jpeg?auto=compress&cs=tinysrgb&w=600",
-    wraps:   "https://images.pexels.com/photos/1565982/pexels-photo-1565982.jpeg?auto=compress&cs=tinysrgb&w=600",
-    frites:  "https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&cs=tinysrgb&w=600",
-    salade:  "https://images.pexels.com/photos/1213710/pexels-photo-1213710.jpeg?auto=compress&cs=tinysrgb&w=600",
-    couscous:"https://images.pexels.com/photos/4193872/pexels-photo-4193872.jpeg?auto=compress&cs=tinysrgb&w=600",
-    tajine:  "https://images.pexels.com/photos/4958641/pexels-photo-4958641.jpeg?auto=compress&cs=tinysrgb&w=600",
-    boisson: "https://images.pexels.com/photos/96974/pexels-photo-96974.jpeg?auto=compress&cs=tinysrgb&w=600",
-    coca:    "https://images.pexels.com/photos/2531190/pexels-photo-2531190.jpeg?auto=compress&cs=tinysrgb&w=600",
+  var SAFE_PHOTOS = {
     eau:     "https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg?auto=compress&cs=tinysrgb&w=600",
+    coca:    "https://images.pexels.com/photos/2531190/pexels-photo-2531190.jpeg?auto=compress&cs=tinysrgb&w=600",
     jus:     "https://images.pexels.com/photos/1337825/pexels-photo-1337825.jpeg?auto=compress&cs=tinysrgb&w=600",
-    dessert: "https://images.pexels.com/photos/1854652/pexels-photo-1854652.jpeg?auto=compress&cs=tinysrgb&w=600",
-    glace:   "https://images.pexels.com/photos/1352281/pexels-photo-1352281.jpeg?auto=compress&cs=tinysrgb&w=600",
     cafe:    "https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=600",
-    soupe:   "https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg?auto=compress&cs=tinysrgb&w=600",
-    poisson: "https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg?auto=compress&cs=tinysrgb&w=600",
-    pates:   "https://images.pexels.com/photos/1438672/pexels-photo-1438672.jpeg?auto=compress&cs=tinysrgb&w=600",
-    sandwich:"https://images.pexels.com/photos/1647163/pexels-photo-1647163.jpeg?auto=compress&cs=tinysrgb&w=600",
+    frites:  "https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&cs=tinysrgb&w=600"
+  };
+
+  var DEFAULT_PHOTOS = {
+    burger:  PLACEHOLDER_DATA_URI,
+    taco:    PLACEHOLDER_DATA_URI,
+    naan:    PLACEHOLDER_DATA_URI,
+    pizza:   PLACEHOLDER_DATA_URI,
+    poulet:  PLACEHOLDER_DATA_URI,
+    riz:     PLACEHOLDER_DATA_URI,
+    kebab:   PLACEHOLDER_DATA_URI,
+    wraps:   PLACEHOLDER_DATA_URI,
+    frites:  SAFE_PHOTOS.frites,
+    salade:  PLACEHOLDER_DATA_URI,
+    couscous:PLACEHOLDER_DATA_URI,
+    tajine:  PLACEHOLDER_DATA_URI,
+    boisson: SAFE_PHOTOS.eau,
+    coca:    SAFE_PHOTOS.coca,
+    eau:     SAFE_PHOTOS.eau,
+    jus:     SAFE_PHOTOS.jus,
+    dessert: PLACEHOLDER_DATA_URI,
+    glace:   PLACEHOLDER_DATA_URI,
+    cafe:    SAFE_PHOTOS.cafe,
+    soupe:   PLACEHOLDER_DATA_URI,
+    poisson: PLACEHOLDER_DATA_URI,
+    pates:   PLACEHOLDER_DATA_URI,
+    sandwich:PLACEHOLDER_DATA_URI,
     default: PLACEHOLDER_DATA_URI
   };
 
