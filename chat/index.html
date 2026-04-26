@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assistant IA Restaurant</title>
     <link href="https://fonts.googleapis.com/css2?family=Outhfit:wght@300;40hh0;500;600;700&display=swap" rel="stylesheet">
+<script src="./photos-defaults.js" defer></script>
     <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -99,6 +100,105 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
 .validation-banner.refused{background:linear-gradient(135deg,#f44336,#d32f2f);color:#fff}
 .validation-banner.timeout{background:linear-gradient(135deg,#9e9e9e,#757575);color:#fff}
 .validation-banner .pulse-icon{display:inline-block;animation:pulse 1.5s infinite}
+
+/* ============================================================ */
+/* CATALOGUE VISUEL + PANIER (Livraison 1)                       */
+/* ============================================================ */
+.catalog-section{background:linear-gradient(180deg,#0e0e0e,#0a0a0a);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;display:flex;flex-direction:column;max-height:62vh;min-height:0}
+.catalog-section.collapsed{max-height:0;border-bottom:none;overflow:hidden}
+.catalog-categories{display:flex;gap:8px;padding:12px 14px 6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0}
+.catalog-categories::-webkit-scrollbar{display:none}
+.cat-pill{flex-shrink:0;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text-muted);font-size:13px;font-weight:500;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap;transition:all .18s ease;letter-spacing:-0.01em}
+.cat-pill:hover{color:var(--text);background:rgba(255,255,255,0.07)}
+.cat-pill.active{background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 70%,#000));color:#fff;border-color:transparent;box-shadow:0 4px 14px color-mix(in srgb,var(--primary) 35%,transparent)}
+.catalog-grid-wrap{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 14px 14px}
+.catalog-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:560px){.catalog-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:820px){.catalog-grid{grid-template-columns:repeat(4,1fr)}}
+.dish-card{background:#141414;border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;position:relative}
+.dish-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--primary) 35%,rgba(255,255,255,0.06));box-shadow:0 8px 22px rgba(0,0,0,0.45)}
+.dish-card:active{transform:translateY(0)}
+.dish-photo{position:relative;width:100%;aspect-ratio:1;background:linear-gradient(135deg,#0f3a3a,#062929);overflow:hidden}
+.dish-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s ease}
+.dish-card:hover .dish-photo img{transform:scale(1.04)}
+.dish-photo .placeholder-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:42px;opacity:.85}
+.dish-add{position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;border:none;background:var(--primary);color:#fff;font-size:22px;font-weight:300;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,0.5);transition:transform .12s ease,filter .15s ease;font-family:'Outfit',sans-serif;padding:0}
+.dish-add:hover{filter:brightness(1.08)}
+.dish-add:active{transform:scale(0.92)}
+.dish-add.in-cart{background:#10b981}
+.dish-info{padding:10px 11px 12px;display:flex;flex-direction:column;gap:4px}
+.dish-name{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.25;letter-spacing:-0.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px}
+.dish-price{font-size:13px;font-weight:700;color:var(--secondary);letter-spacing:-0.01em}
+.dish-desc{font-size:11.5px;color:var(--text-muted);line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.catalog-empty{padding:30px 20px;text-align:center;color:var(--text-muted);font-size:13.5px;line-height:1.5}
+.catalog-empty .emoji{display:block;font-size:32px;margin-bottom:8px;opacity:.7}
+.cart-bar{display:none;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:linear-gradient(180deg,#101010,#0c0c0c);border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0}
+.cart-bar.show{display:flex}
+.cart-bar-info{display:flex;align-items:center;gap:10px;min-width:0;flex:1;cursor:pointer}
+.cart-bar-count{flex-shrink:0;width:32px;height:32px;border-radius:10px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;letter-spacing:-0.02em}
+.cart-bar-text{font-size:13px;color:var(--text);min-width:0}
+.cart-bar-text b{color:var(--text);font-weight:600;display:block;letter-spacing:-0.01em}
+.cart-bar-text small{color:var(--text-muted);font-size:11.5px}
+.cart-bar-btn{flex-shrink:0;padding:10px 16px;border-radius:11px;border:none;background:var(--secondary);color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:-0.01em;display:inline-flex;align-items:center;gap:6px;transition:filter .15s ease,transform .08s ease}
+.cart-bar-btn:hover{filter:brightness(1.05)}
+.cart-bar-btn:active{transform:translateY(1px)}
+.order-cta{display:none;padding:10px 14px;background:linear-gradient(180deg,rgba(10,10,10,0.85),rgba(10,10,10,1));border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+.order-cta.show{display:block}
+.order-cta-btn{width:100%;padding:14px 16px;border-radius:14px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:-0.01em;box-shadow:0 8px 22px rgba(16,185,129,0.3);transition:filter .15s ease,transform .08s ease}
+.order-cta-btn:hover{filter:brightness(1.06)}
+.order-cta-btn:active{transform:translateY(1px)}
+.iabot-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:200;padding:0;animation:bgIn .2s ease}
+.iabot-modal-bg.open{display:flex;align-items:flex-end;justify-content:center}
+@media(min-width:600px){.iabot-modal-bg.open{align-items:center;padding:24px}}
+@keyframes bgIn{from{opacity:0}to{opacity:1}}
+.iabot-modal{background:#121212;border:1px solid rgba(255,255,255,0.08);border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;-webkit-overflow-scrolling:touch;animation:modalUp .25s cubic-bezier(.2,.9,.3,1.2)}
+@media(min-width:600px){.iabot-modal{border-radius:18px}}
+@keyframes modalUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.dish-modal-photo{width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#0f3a3a,#062929);overflow:hidden;position:relative}
+.dish-modal-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.dish-modal-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif}
+.dish-modal-body{padding:18px 18px 22px}
+.dish-modal-name{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-0.02em;margin-bottom:4px}
+.dish-modal-price{font-size:18px;font-weight:700;color:var(--secondary);margin-bottom:12px}
+.dish-modal-desc{font-size:14px;color:var(--text-muted);line-height:1.5;margin-bottom:18px}
+.dish-modal-qty{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px}
+.dish-modal-qty button{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:#1a1a1a;color:#fff;font-size:20px;font-weight:300;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center}
+.dish-modal-qty button:active{transform:scale(0.92)}
+.dish-modal-qty .qty-val{font-size:22px;font-weight:700;min-width:36px;text-align:center;color:var(--text);font-variant-numeric:tabular-nums}
+.dish-modal-cta{width:100%;padding:14px;border-radius:13px;border:none;background:var(--primary);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:-0.01em;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s ease}
+.dish-modal-cta:hover{filter:brightness(1.06)}
+.cart-modal-header{padding:18px 18px 12px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+.cart-modal-header h3{font-size:18px;color:var(--text);font-weight:600;letter-spacing:-0.02em}
+.cart-modal-close{background:none;border:none;color:var(--text-muted);font-size:22px;cursor:pointer;padding:4px;font-family:'Outfit',sans-serif}
+.cart-list{padding:8px 6px}
+.cart-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;transition:background .15s ease}
+.cart-item:hover{background:rgba(255,255,255,0.02)}
+.cart-item-photo{width:54px;height:54px;border-radius:10px;background:#1a1a1a;flex-shrink:0;overflow:hidden}
+.cart-item-photo img{width:100%;height:100%;object-fit:cover}
+.cart-item-info{flex:1;min-width:0}
+.cart-item-name{font-size:13.5px;font-weight:600;color:var(--text);letter-spacing:-0.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cart-item-price{font-size:12.5px;color:var(--text-muted)}
+.cart-item-qty{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.cart-item-qty button{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:#1a1a1a;color:#fff;font-size:14px;cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;padding:0}
+.cart-item-qty span{min-width:20px;text-align:center;font-weight:600;font-size:13px;color:var(--text);font-variant-numeric:tabular-nums}
+.cart-item-remove{background:none;border:none;color:#ef4444;font-size:14px;cursor:pointer;padding:4px 6px;font-family:'Outfit',sans-serif}
+.cart-empty{padding:50px 20px;text-align:center;color:var(--text-muted);font-size:14px}
+.cart-empty .emoji{display:block;font-size:38px;margin-bottom:10px;opacity:.6}
+.cart-modal-footer{padding:14px 18px 18px;border-top:1px solid rgba(255,255,255,0.06);background:#101010;position:sticky;bottom:0}
+.cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:15px}
+.cart-total b{font-size:18px;color:var(--secondary);letter-spacing:-0.02em}
+.cart-confirm-btn{width:100%;padding:15px;border-radius:13px;border:none;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:-0.01em;box-shadow:0 8px 22px rgba(16,185,129,0.3);transition:filter .15s ease,transform .08s ease}
+.cart-confirm-btn:active{transform:translateY(1px)}
+.cart-confirm-btn[disabled]{opacity:.55;cursor:not-allowed}
+.order-form-row{margin-bottom:14px}
+.order-form-row label{display:block;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;font-weight:600;margin-bottom:6px}
+.order-form-row input{width:100%;padding:13px 14px;background:#0c0c0c;color:var(--text);border:1px solid rgba(255,255,255,0.1);border-radius:11px;font-size:15px;outline:none;font-family:'Outfit',sans-serif;transition:border-color .15s ease}
+.order-form-row input:focus{border-color:var(--primary)}
+.service-toggle{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.service-toggle button{padding:13px;border-radius:11px;border:1px solid rgba(255,255,255,0.1);background:#0c0c0c;color:var(--text-muted);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:-0.01em;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s ease}
+.service-toggle button .ico{font-size:20px}
+.service-toggle button.active{background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 70%,#000));color:#fff;border-color:transparent}
+
 </style>
 </head>
 <body>
@@ -121,7 +221,88 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
             <a href="#" class="map-btn" id="mapBtn" target="_blank">&#128205; Itinéraire</a>
         </div>
     </div>
-    <div class="context-banner" id="contextBanner"></div>
+    
+<!-- Catalog section (Livraison 1) -->
+<div class="catalog-section" id="catalogSection" style="display:none">
+  <div class="catalog-categories" id="catalogCategories"></div>
+  <div class="catalog-grid-wrap">
+    <div class="catalog-grid" id="catalogGrid"></div>
+  </div>
+</div>
+
+<div class="cart-bar" id="cartBar">
+  <div class="cart-bar-info" onclick="openCartModal()">
+    <div class="cart-bar-count" id="cartBarCount">0</div>
+    <div class="cart-bar-text">
+      <b id="cartBarTitle">0 article</b>
+      <small id="cartBarSubtitle">Voir le panier</small>
+    </div>
+  </div>
+  <button class="cart-bar-btn" type="button" onclick="openCartModal()">
+    <span id="cartBarTotal">0,00€</span> <span>→</span>
+  </button>
+</div>
+
+<div class="order-cta" id="orderCta">
+  <button class="order-cta-btn" type="button" onclick="openCartModal()">
+    🛍️ <span id="orderCtaText">Commander - 0,00€</span>
+  </button>
+</div>
+
+<div class="iabot-modal-bg" id="dishModal" onclick="if(event.target===this)closeDishModal()">
+  <div class="iabot-modal" id="dishModalCard">
+    <div class="dish-modal-photo">
+      <img id="dishModalPhoto" alt="">
+      <button class="dish-modal-close" type="button" onclick="closeDishModal()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="dish-modal-body">
+      <div class="dish-modal-name" id="dishModalName">—</div>
+      <div class="dish-modal-price" id="dishModalPrice">—</div>
+      <div class="dish-modal-desc" id="dishModalDesc"></div>
+      <div class="dish-modal-qty">
+        <button type="button" onclick="dishModalChangeQty(-1)" aria-label="Diminuer">−</button>
+        <div class="qty-val" id="dishModalQty">1</div>
+        <button type="button" onclick="dishModalChangeQty(1)" aria-label="Augmenter">+</button>
+      </div>
+      <button class="dish-modal-cta" type="button" onclick="dishModalAddToCart()">
+        <span>Ajouter au panier</span> <span id="dishModalCtaPrice">·</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="iabot-modal-bg" id="cartModal" onclick="if(event.target===this)closeCartModal()">
+  <div class="iabot-modal" id="cartModalCard">
+    <div class="cart-modal-header">
+      <h3>Votre panier</h3>
+      <button class="cart-modal-close" type="button" onclick="closeCartModal()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="cart-modal-footer" id="cartModalFooter">
+      <div class="service-toggle" id="cartServiceToggle">
+        <button type="button" data-service="sur_place" class="active" onclick="setCartService('sur_place')">
+          <span class="ico">🍽️</span><span>Sur place</span>
+        </button>
+        <button type="button" data-service="emporter" onclick="setCartService('emporter')">
+          <span class="ico">📦</span><span>À emporter</span>
+        </button>
+      </div>
+      <div class="order-form-row">
+        <label>Votre prénom</label>
+        <input type="text" id="cartCustomerName" placeholder="Votre prénom" autocomplete="given-name">
+      </div>
+      <div class="cart-total">
+        <span>Total</span>
+        <b id="cartTotalAmount">0,00€</b>
+      </div>
+      <button class="cart-confirm-btn" id="cartConfirmBtn" type="button" onclick="submitCartOrder()">
+        Commander
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="context-banner" id="contextBanner"></div>
     <div id="orderBannersContainer"></div>
     <div class="test-banner" id="testBanner">🧪 Mode test — Les commandes ne sont pas envoyées au restaurant</div>
 <div class="offline-banner" id="offlineBanner">Pas de connexion internet</div>
@@ -846,6 +1027,443 @@ if(window.visualViewport){
         },100);
     });
 }
+
+
+/* ============================================================ */
+/* CATALOGUE + PANIER (Livraison 1) — sans Claude API           */
+/* ============================================================ */
+
+var CATALOG = {
+  enabled: false, menuText: '', categories: [], flatItems: {},
+  activeCategory: 'all', cart: [], service: 'sur_place',
+  customerName: '', pendingDish: null
+};
+
+var DEMO_MENU_TEXT = [
+  '[BURGERS]',
+  'Burger Maison - 9,50€ - Steak haché halal, fromage, salade, oignons',
+  'Cheese Burger - 10,00€ - Double fromage, sauce maison',
+  'Chicken Burger - 9,00€ - Escalope poulet halal panée, salade, sauce',
+  '',
+  '[TACOS & WRAPS]',
+  'Tacos Poulet - 8,50€ - Poulet halal, frites, sauce algérienne',
+  'Tacos Viande Hachée - 9,00€ - Viande hachée halal, frites, fromage',
+  'Wrap Kebab - 7,50€ - Émincés de viande halal, salade, sauce blanche',
+  '',
+  '[ACCOMPAGNEMENTS]',
+  'Frites - 3,50€ - Frites maison, sel ou paprika',
+  'Salade verte - 4,00€ - Salade fraîche, vinaigrette',
+  '',
+  '[BOISSONS]',
+  'Coca-Cola 33cl - 2,50€',
+  'Eau plate 50cl - 1,50€',
+  'Jus d\'orange - 3,00€',
+  '',
+  '[DESSERTS]',
+  'Tiramisu maison - 4,50€ - Crème mascarpone, café',
+  'Glace 2 boules - 3,50€ - Vanille, chocolat ou fraise'
+].join('\n');
+
+function detectDemoMode() {
+  try { return new URLSearchParams(window.location.search).get('demo') === '1'; }
+  catch(e){ return false; }
+}
+
+function parseMenuText(text) {
+  if (!text || typeof text !== 'string') return [];
+  var lines = text.split(/\r?\n/);
+  var categories = [];
+  var current = null;
+  var idCounter = 0;
+
+  function newCategory(name) {
+    var n = (name || '').trim();
+    if (!n) n = 'Plats';
+    current = { name: n, items: [] };
+    categories.push(current);
+  }
+
+  var reBracket = /^\s*\[\s*(.+?)\s*\]\s*$/;
+  var reColon   = /^\s*([A-ZÀ-Ÿ][A-ZÀ-Ÿ0-9 \-&'’]{2,40})\s*:\s*$/;
+  var reEqual   = /^\s*=+\s*(.+?)\s*=+\s*$/;
+  var reDash    = /^\s*-{2,}\s*(.+?)\s*-{2,}\s*$/;
+  var rePlat = /^\s*[\u2022\u2023\u25E6\u00B7\*\-]?\s*(.+?)\s+[\-–—:]\s*([0-9]{1,3}(?:[.,][0-9]{1,2})?)\s*(?:€|EUR|euros?)\b\s*(?:[\-–—]\s*(.+?))?\s*$/i;
+  var rePhoto = /\bphoto\s*[:=]\s*(https?:\/\/[^\s]+)/i;
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = (lines[i] || '').trim();
+    if (!line) continue;
+    var m;
+    if ((m = line.match(reBracket))) { newCategory(m[1]); continue; }
+    if ((m = line.match(reEqual)))   { newCategory(m[1]); continue; }
+    if ((m = line.match(reDash)))    { newCategory(m[1]); continue; }
+    if ((m = line.match(reColon)))   { newCategory(m[1]); continue; }
+    var d = line.match(rePlat);
+    if (d) {
+      var description = d[3] || '';
+      var photoUrl = null;
+      var pm = description.match(rePhoto);
+      if (pm) {
+        photoUrl = pm[1].replace(/[.,;]+$/, '');
+        description = description.replace(rePhoto, '').replace(/\s*[\-–—,;]\s*$/, '').trim();
+      }
+      if (!current) newCategory('Plats');
+      var name = d[1].trim();
+      var price = parseFloat((d[2] || '0').replace(',', '.'));
+      var id = 'd_' + (++idCounter);
+      var photo = photoUrl || (window.IABOT_PHOTOS ? window.IABOT_PHOTOS.getPhotoForDish(name) : '');
+      var item = {
+        id: id, name: name, price: isFinite(price) ? price : 0,
+        desc: description, photo: photo, category: current.name
+      };
+      current.items.push(item);
+      CATALOG.flatItems[id] = item;
+    }
+  }
+  return categories.filter(function(c){ return c.items && c.items.length > 0; });
+}
+
+function isPlaceholderMenu(text) {
+  if (!text) return true;
+  var t = text.toLowerCase();
+  return t.length < 30 ||
+         t.indexOf('en cours de configuration') !== -1 ||
+         t.indexOf('contactez le restaurant') !== -1;
+}
+
+function initCatalog() {
+  if (CATALOG.enabled) return;
+  var demoMode = detectDemoMode();
+  var menuText = '';
+  if (demoMode) {
+    menuText = DEMO_MENU_TEXT;
+  } else if (restoData && restoData.menu && !isPlaceholderMenu(restoData.menu)) {
+    menuText = restoData.menu;
+  } else {
+    return;
+  }
+  CATALOG.menuText = menuText;
+  CATALOG.flatItems = {};
+  CATALOG.categories = parseMenuText(menuText);
+  if (!CATALOG.categories.length) return;
+  CATALOG.enabled = true;
+  document.getElementById('catalogSection').style.display = 'flex';
+  renderCatalogCategories();
+  renderCatalogGrid();
+  loadCartFromStorage();
+  updateCartUI();
+}
+
+function renderCatalogCategories() {
+  var wrap = document.getElementById('catalogCategories');
+  if (!wrap) return;
+  var html = '';
+  html += '<button class="cat-pill ' + (CATALOG.activeCategory === 'all' ? 'active' : '') + '" type="button" onclick="setCatalogCategory(\'all\')">Tous</button>';
+  CATALOG.categories.forEach(function(cat){
+    var cls = (CATALOG.activeCategory === cat.name) ? 'active' : '';
+    var safeCat = cat.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    html += '<button class="cat-pill ' + cls + '" type="button" onclick="setCatalogCategory(\'' + safeCat + '\')">' + escapeHtml(cat.name) + '</button>';
+  });
+  wrap.innerHTML = html;
+}
+
+function setCatalogCategory(cat) {
+  CATALOG.activeCategory = cat;
+  renderCatalogCategories();
+  renderCatalogGrid();
+  var wrap = document.querySelector('.catalog-grid-wrap');
+  if (wrap) wrap.scrollTop = 0;
+}
+
+function getDishesToRender() {
+  var out = [];
+  CATALOG.categories.forEach(function(cat){
+    if (CATALOG.activeCategory === 'all' || CATALOG.activeCategory === cat.name) {
+      cat.items.forEach(function(it){ out.push(it); });
+    }
+  });
+  return out;
+}
+
+function renderCatalogGrid() {
+  var grid = document.getElementById('catalogGrid');
+  if (!grid) return;
+  var items = getDishesToRender();
+  if (!items.length) {
+    grid.innerHTML = '<div class="catalog-empty"><span class="emoji">🍽️</span>Aucun plat dans cette catégorie.</div>';
+    return;
+  }
+  var html = '';
+  items.forEach(function(it){
+    var inCart = CATALOG.cart.some(function(c){ return c.id === it.id; });
+    var photoSrc = it.photo || (window.IABOT_PHOTOS ? window.IABOT_PHOTOS.PLACEHOLDER : '');
+    html += '<div class="dish-card" onclick="openDishModal(\'' + it.id + '\')">';
+    html += '  <div class="dish-photo">';
+    if (photoSrc) {
+      html += '    <img loading="lazy" src="' + escapeHtml(photoSrc) + '" alt="" onerror="this.style.display=\'none\';this.parentNode.querySelector(\'.placeholder-icon\').style.display=\'flex\'">';
+    }
+    html += '    <span class="placeholder-icon" style="display:' + (photoSrc ? 'none' : 'flex') + '">🍽️</span>';
+    html += '    <button class="dish-add' + (inCart ? ' in-cart' : '') + '" type="button" onclick="event.stopPropagation();quickAdd(\'' + it.id + '\')" aria-label="Ajouter">' + (inCart ? '✓' : '+') + '</button>';
+    html += '  </div>';
+    html += '  <div class="dish-info">';
+    html += '    <div class="dish-name">' + escapeHtml(it.name) + '</div>';
+    html += '    <div class="dish-price">' + formatPrice(it.price) + '</div>';
+    if (it.desc) html += '    <div class="dish-desc">' + escapeHtml(it.desc) + '</div>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+function formatPrice(n) {
+  var v = (typeof n === 'number' && isFinite(n)) ? n : parseFloat(n) || 0;
+  return v.toFixed(2).replace('.', ',') + '€';
+}
+
+function quickAdd(id) {
+  var dish = CATALOG.flatItems[id];
+  if (!dish) return;
+  addToCart(dish, 1);
+}
+
+function addToCart(dish, qty) {
+  if (!dish) return;
+  qty = qty || 1;
+  var existing = CATALOG.cart.find(function(c){ return c.id === dish.id; });
+  if (existing) { existing.qty += qty; }
+  else { CATALOG.cart.push({ id: dish.id, name: dish.name, price: dish.price, qty: qty, photo: dish.photo, desc: dish.desc }); }
+  saveCartToStorage();
+  updateCartUI();
+  renderCatalogGrid();
+}
+
+function changeCartQty(id, delta) {
+  var item = CATALOG.cart.find(function(c){ return c.id === id; });
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) CATALOG.cart = CATALOG.cart.filter(function(c){ return c.id !== id; });
+  saveCartToStorage();
+  updateCartUI();
+  renderCatalogGrid();
+  renderCartList();
+}
+
+function removeFromCart(id) {
+  CATALOG.cart = CATALOG.cart.filter(function(c){ return c.id !== id; });
+  saveCartToStorage();
+  updateCartUI();
+  renderCatalogGrid();
+  renderCartList();
+}
+
+function cartTotalAmount() { return CATALOG.cart.reduce(function(s,c){ return s + c.price * c.qty; }, 0); }
+function cartItemsCount() { return CATALOG.cart.reduce(function(s,c){ return s + c.qty; }, 0); }
+
+function updateCartUI() {
+  var n = cartItemsCount();
+  var t = cartTotalAmount();
+  var bar = document.getElementById('cartBar');
+  var cta = document.getElementById('orderCta');
+  if (n > 0) {
+    bar.classList.add('show');
+    cta.classList.add('show');
+    document.getElementById('cartBarCount').textContent = n;
+    document.getElementById('cartBarTitle').textContent = n + (n > 1 ? ' articles' : ' article');
+    document.getElementById('cartBarTotal').textContent = formatPrice(t);
+    document.getElementById('orderCtaText').textContent = 'Commander - ' + formatPrice(t);
+  } else {
+    bar.classList.remove('show');
+    cta.classList.remove('show');
+  }
+}
+
+function saveCartToStorage() {
+  try {
+    var key = 'iabot_cart_' + restoId;
+    localStorage.setItem(key, JSON.stringify({ cart: CATALOG.cart, service: CATALOG.service, customerName: CATALOG.customerName, ts: Date.now() }));
+  } catch(e) {}
+}
+
+function loadCartFromStorage() {
+  try {
+    var key = 'iabot_cart_' + restoId;
+    var raw = localStorage.getItem(key);
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    if (data && data.ts && (Date.now() - data.ts > 2*60*60*1000)) { localStorage.removeItem(key); return; }
+    if (data && Array.isArray(data.cart)) {
+      CATALOG.cart = data.cart.filter(function(c){ return CATALOG.flatItems[c.id]; });
+      CATALOG.service = data.service || 'sur_place';
+      CATALOG.customerName = data.customerName || '';
+    }
+  } catch(e) {}
+}
+
+function clearCart() {
+  CATALOG.cart = [];
+  saveCartToStorage();
+  updateCartUI();
+  renderCatalogGrid();
+}
+
+function openDishModal(id) {
+  var dish = CATALOG.flatItems[id];
+  if (!dish) return;
+  CATALOG.pendingDish = { id: id, qty: 1 };
+  var photo = dish.photo || (window.IABOT_PHOTOS ? window.IABOT_PHOTOS.PLACEHOLDER : '');
+  document.getElementById('dishModalPhoto').src = photo;
+  document.getElementById('dishModalName').textContent = dish.name;
+  document.getElementById('dishModalPrice').textContent = formatPrice(dish.price);
+  document.getElementById('dishModalDesc').textContent = dish.desc || '';
+  document.getElementById('dishModalQty').textContent = '1';
+  document.getElementById('dishModalCtaPrice').textContent = formatPrice(dish.price);
+  document.getElementById('dishModal').classList.add('open');
+}
+
+function closeDishModal() {
+  document.getElementById('dishModal').classList.remove('open');
+  CATALOG.pendingDish = null;
+}
+
+function dishModalChangeQty(delta) {
+  if (!CATALOG.pendingDish) return;
+  CATALOG.pendingDish.qty = Math.max(1, CATALOG.pendingDish.qty + delta);
+  document.getElementById('dishModalQty').textContent = CATALOG.pendingDish.qty;
+  var dish = CATALOG.flatItems[CATALOG.pendingDish.id];
+  if (dish) document.getElementById('dishModalCtaPrice').textContent = formatPrice(dish.price * CATALOG.pendingDish.qty);
+}
+
+function dishModalAddToCart() {
+  if (!CATALOG.pendingDish) return;
+  var dish = CATALOG.flatItems[CATALOG.pendingDish.id];
+  if (!dish) { closeDishModal(); return; }
+  addToCart(dish, CATALOG.pendingDish.qty);
+  closeDishModal();
+}
+
+function openCartModal() {
+  if (!CATALOG.cart.length) return;
+  var input = document.getElementById('cartCustomerName');
+  if (input && CATALOG.customerName) input.value = CATALOG.customerName;
+  setCartService(CATALOG.service);
+  renderCartList();
+  document.getElementById('cartModal').classList.add('open');
+}
+
+function closeCartModal() { document.getElementById('cartModal').classList.remove('open'); }
+
+function setCartService(s) {
+  CATALOG.service = (s === 'emporter' ? 'emporter' : 'sur_place');
+  document.querySelectorAll('#cartServiceToggle button').forEach(function(b){
+    b.classList.toggle('active', b.dataset.service === CATALOG.service);
+  });
+  saveCartToStorage();
+}
+
+function renderCartList() {
+  var list = document.getElementById('cartList');
+  var footer = document.getElementById('cartModalFooter');
+  if (!list) return;
+  if (!CATALOG.cart.length) {
+    list.innerHTML = '<div class="cart-empty"><span class="emoji">🛒</span>Votre panier est vide.<br>Ajoutez des plats depuis le catalogue.</div>';
+    if (footer) footer.style.display = 'none';
+    return;
+  }
+  if (footer) footer.style.display = '';
+  var html = '';
+  CATALOG.cart.forEach(function(c){
+    var photo = c.photo || (window.IABOT_PHOTOS ? window.IABOT_PHOTOS.PLACEHOLDER : '');
+    html += '<div class="cart-item">';
+    html += '  <div class="cart-item-photo"><img src="' + escapeHtml(photo) + '" alt="" onerror="this.style.display=\'none\'"></div>';
+    html += '  <div class="cart-item-info">';
+    html += '    <div class="cart-item-name">' + escapeHtml(c.name) + '</div>';
+    html += '    <div class="cart-item-price">' + formatPrice(c.price) + ' × ' + c.qty + ' = <b>' + formatPrice(c.price * c.qty) + '</b></div>';
+    html += '  </div>';
+    html += '  <div class="cart-item-qty">';
+    html += '    <button type="button" onclick="changeCartQty(\'' + c.id + '\', -1)">−</button>';
+    html += '    <span>' + c.qty + '</span>';
+    html += '    <button type="button" onclick="changeCartQty(\'' + c.id + '\', 1)">+</button>';
+    html += '    <button class="cart-item-remove" type="button" onclick="removeFromCart(\'' + c.id + '\')">✕</button>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+  document.getElementById('cartTotalAmount').textContent = formatPrice(cartTotalAmount());
+}
+
+async function submitCartOrder() {
+  if (!CATALOG.cart.length) return;
+  var nameInput = document.getElementById('cartCustomerName');
+  var customerName = (nameInput && nameInput.value || '').trim();
+  if (!customerName) { nameInput.focus(); nameInput.style.borderColor = '#ef4444'; return; }
+  CATALOG.customerName = customerName;
+  saveCartToStorage();
+  var btn = document.getElementById('cartConfirmBtn');
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
+  var orderData = {
+    plats: CATALOG.cart.map(function(c){ return { nom: c.name, prix: c.price, quantite: c.qty }; }),
+    total: cartTotalAmount(),
+    type_service: CATALOG.service,
+    nom_client: customerName,
+    source: 'catalog',
+    resto_id: restoId,
+    conversation_id: sessionId
+  };
+  try {
+    closeCartModal();
+    addMessage('🛍️ Commande envoyée — ' + cartItemsCount() + ' articles · ' + formatPrice(cartTotalAmount()), 'user');
+    if (typeof sendOrderToWebhook === 'function') {
+      await sendOrderToWebhook(orderData);
+    } else {
+      addMessage('Erreur technique: fonction de commande introuvable.', 'bot');
+    }
+    clearCart();
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Commander';
+    addMessage('Erreur lors de l\'envoi: ' + (e && e.message ? e.message : 'inconnue'), 'bot');
+  }
+}
+
+function tryInitCatalogAfterReady() {
+  if (detectDemoMode()) {
+    if (!restoData) {
+      restoData = { nom: 'Démo Restaurant', couleur_principale: '#FF6B00', couleur_secondaire: '#FFD700', menu: '' };
+      try { applyRestoData(restoData); } catch(e){}
+    }
+    initCatalog();
+    return;
+  }
+  if (restoData && restoData.menu && !isPlaceholderMenu(restoData.menu)) {
+    initCatalog();
+  }
+}
+
+(function patchApplyRestoData(){
+  var attempts = 0;
+  function tryPatch() {
+    if (typeof applyRestoData === 'function' && !applyRestoData.__catalogPatched) {
+      var original = applyRestoData;
+      window.applyRestoData = function(d){
+        var r = original.apply(this, arguments);
+        try { tryInitCatalogAfterReady(); } catch(e){ console.error('catalog init error:', e); }
+        return r;
+      };
+      window.applyRestoData.__catalogPatched = true;
+    } else if (attempts++ < 50) {
+      setTimeout(tryPatch, 50);
+    }
+  }
+  tryPatch();
+})();
+
+document.addEventListener('DOMContentLoaded', function(){
+  if (detectDemoMode()) {
+    setTimeout(tryInitCatalogAfterReady, 200);
+  }
+});
+
 
 /* ===== INITIALIZATION ===== */
 (async function init(){
