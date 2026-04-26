@@ -1,6 +1,5 @@
-undefined// chat/photos-defaults.js
-// Photos par défaut HALAL-SAFE (Pexels libre de droit) + détection auto par mot-clé.
-
+// chat/photos-defaults.js
+// Photos par defaut HALAL-SAFE (Pexels libre de droit) + detection auto par mot-cle.
 (function (global) {
   "use strict";
 
@@ -11,7 +10,7 @@ undefined// chat/photos-defaults.js
       '<stop offset="0%" stop-color="#0f3a3a"/><stop offset="100%" stop-color="#062929"/>' +
       '</linearGradient></defs>' +
       '<rect width="600" height="600" fill="url(#g)"/>' +
-      '<text x="50%" y="50%" font-size="240" text-anchor="middle" dominant-baseline="central" fill="rgba(255,255,255,0.85)">🍽️</text>' +
+      '<text x="50%" y="50%" font-size="240" text-anchor="middle" dominant-baseline="central" fill="rgba(255,255,255,0.85)">DISH</text>' +
       '</svg>'
     );
 
@@ -43,10 +42,10 @@ undefined// chat/photos-defaults.js
   };
 
   var KEYWORD_RULES = [
-    { test: /(makloub|m['’]akloub|maklouba)/i,                    photo: "kebab" },
+    { test: /(makloub|maklouba)/i,                                 photo: "kebab" },
     { test: /(tajine|tagine)/i,                                    photo: "tajine" },
     { test: /(couscous|seksu)/i,                                   photo: "couscous" },
-    { test: /(kebab|d[oö]ner|d[uü]rum|sh?awarma|chawarma)/i,       photo: "kebab" },
+    { test: /(kebab|doner|donner|durum|shawarma|chawarma)/i,       photo: "kebab" },
     { test: /(burger|cheese|big mac|smash)/i,                      photo: "burger" },
     { test: /(taco|tortilla)/i,                                    photo: "taco" },
     { test: /(naan|chapati|roti)/i,                                photo: "naan" },
@@ -54,16 +53,16 @@ undefined// chat/photos-defaults.js
     { test: /(poulet|chicken|escalope|nuggets|tenders|wings)/i,    photo: "poulet" },
     { test: /(poisson|saumon|thon|cabillaud|colin|merlu)/i,        photo: "poisson" },
     { test: /(riz|rice|biriyani|biryani|pilaf)/i,                  photo: "riz" },
-    { test: /(p[aâ]tes|pasta|spaghetti|tagliatelle|penne|lasagne)/i, photo: "pates" },
+    { test: /(pates|pasta|spaghetti|tagliatelle|penne|lasagne)/i,  photo: "pates" },
     { test: /(sandwich|panini|club)/i,                             photo: "sandwich" },
     { test: /(wrap|fajita)/i,                                      photo: "wraps" },
     { test: /(frite|frites|chips|potato)/i,                        photo: "frites" },
-    { test: /(salade|c[ée]sar|salad)/i,                            photo: "salade" },
+    { test: /(salade|cesar|salad)/i,                               photo: "salade" },
     { test: /(soupe|soup|harira|chorba)/i,                         photo: "soupe" },
-    { test: /(coca|cola|fanta|sprite|sodas?)/i,                    photo: "coca" },
+    { test: /(coca|cola|fanta|sprite|soda|sodas)/i,                photo: "coca" },
     { test: /(eau|water|evian|cristaline|h2o)/i,                   photo: "eau" },
     { test: /(jus|juice|orangina|nectar)/i,                        photo: "jus" },
-    { test: /(caf[ée]|coffee|expresso|espresso|capp?ucc?ino|latte)/i, photo: "cafe" },
+    { test: /(cafe|coffee|expresso|espresso|cappuccino|capucino|latte)/i, photo: "cafe" },
     { test: /(boisson|drink|smoothie|milkshake)/i,                 photo: "boisson" },
     { test: /(glace|ice cream|sorbet|sundae)/i,                    photo: "glace" },
     { test: /(dessert|tiramisu|brownie|fondant|cheesecake|cake|tarte|crumble)/i, photo: "dessert" }
