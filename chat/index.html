@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Assistant IA Restaurant</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outhfit:wght@300;40hh0;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="./photos-defaults.js" defer></script>
     <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-    --primary:#FF6B00;--secondary:#FFD700;--bg:#0a0a0a;--chahht-bg:#111111;
+    --primary:#FF6B00;--secondary:#FFD700;--bg:#0a0a0a;--chat-bg:#111111;
     --user-bubble:var(--primary);--bot-bubble:#1a1a1a;
     --text:rgba(255,255,255,0.9);--text-muted:rgba(255,255,255,0.5);
     --viewport-height:100vh;
@@ -198,6 +198,27 @@ body{font-family:'Outfit',system-ui,-apple-system,sans-serif;background:var(--bg
 .service-toggle button{padding:13px;border-radius:11px;border:1px solid rgba(255,255,255,0.1);background:#0c0c0c;color:var(--text-muted);font-size:13.5px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;letter-spacing:-0.01em;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s ease}
 .service-toggle button .ico{font-size:20px}
 .service-toggle button.active{background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 70%,#000));color:#fff;border-color:transparent}
+
+
+/* ============================================================ */
+/* CHAT COLLAPSIBLE (Livraison 2) */
+/* ============================================================ */
+.chat-collapsed .chat-area,
+.chat-collapsed .quick-btns,
+.chat-collapsed .input-area,
+.chat-collapsed .typing-indicator,
+.chat-collapsed .footer{display:none!important}
+.chat-collapsed .catalog-section{max-height:none!important;flex:1}
+.chat-toggle-fab{position:fixed;right:14px;bottom:18px;z-index:150;background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 70%,#000));color:#fff;border:none;border-radius:999px;padding:12px 18px 12px 14px;font-family:'Outfit',sans-serif;font-weight:600;font-size:13.5px;letter-spacing:-0.01em;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.55),0 2px 6px rgba(255,107,0,0.3);display:none;align-items:center;gap:8px;transition:transform .15s ease,filter .15s ease}
+.chat-toggle-fab:hover{filter:brightness(1.08)}
+.chat-toggle-fab:active{transform:scale(0.96)}
+.chat-toggle-fab.show{display:inline-flex}
+.chat-toggle-fab .ico{font-size:16px;line-height:1}
+.chat-toggle-fab .badge{background:#fff;color:var(--primary);border-radius:999px;font-size:11px;font-weight:700;padding:1px 7px;margin-left:2px;line-height:1.4}
+.chat-collapsed .chat-toggle-fab{bottom:18px}
+body:not(.chat-collapsed) .chat-toggle-fab.show{background:rgba(20,20,20,0.92);border:1px solid rgba(255,255,255,0.12);box-shadow:0 6px 18px rgba(0,0,0,0.5);font-size:12.5px;padding:10px 14px}
+body:not(.chat-collapsed) .chat-toggle-fab .badge{display:none}
+@media(max-width:480px){.chat-toggle-fab{right:10px;bottom:14px;font-size:13px;padding:11px 16px 11px 13px}}
 
 </style>
 </head>
@@ -1599,6 +1620,231 @@ window.addEventListener('offline',function(){
 document.getElementById('offlineBanner').style.display='block';
 displaySystemMessage('Pas de connexion internet. Reconnectez-vous pour utiliser l\'assistant.');
 });
+
+/* ============================================================ */
+/* CHAT TOGGLE + UPDATE_CART HANDLER (Livraison 2) */
+/* ============================================================ */
+var CHAT_UI = { collapsed: false, unread: 0, autoCollapsedOnce: false };
+
+function showChatToggleFab() {
+  var fab = document.getElementById('chatToggleFab');
+  if (fab) fab.classList.add('show');
+}
+
+function hideChatToggleFab() {
+  var fab = document.getElementById('chatToggleFab');
+  if (fab) fab.classList.remove('show');
+}
+
+function updateChatToggleLabel() {
+  var lbl = document.getElementById('chatToggleLabel');
+  var ico = document.getElementById('chatToggleIco');
+  var badge = document.getElementById('chatToggleBadge');
+  if (!lbl || !ico) return;
+  if (CHAT_UI.collapsed) {
+    ico.textContent = '💬';
+    lbl.textContent = "Parler à l'assistant";
+    if (badge) {
+      if (CHAT_UI.unread > 0) {
+        badge.style.display = '';
+        badge.textContent = CHAT_UI.unread > 9 ? '9+' : String(CHAT_UI.unread);
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  } else {
+    ico.textContent = '🛍️';
+    lbl.textContent = 'Voir le menu';
+    if (badge) badge.style.display = 'none';
+  }
+}
+
+function setChatCollapsed(collapsed) {
+  CHAT_UI.collapsed = !!collapsed;
+  document.body.classList.toggle('chat-collapsed', CHAT_UI.collapsed);
+  if (!CHAT_UI.collapsed) {
+    CHAT_UI.unread = 0;
+    setTimeout(function(){
+      var area = document.getElementById('chatArea');
+      if (area) area.scrollTop = area.scrollHeight;
+    }, 50);
+  }
+  updateChatToggleLabel();
+}
+
+function toggleChat() {
+  setChatCollapsed(!CHAT_UI.collapsed);
+}
+
+function maybeAutoCollapseChat() {
+  if (CHAT_UI.autoCollapsedOnce) return;
+  if (!CATALOG || !CATALOG.enabled) return;
+  // Auto-collapse only if no real conversation has happened
+  var historyLen = (typeof conversationHistory !== 'undefined' && Array.isArray(conversationHistory)) ? conversationHistory.length : 0;
+  if (historyLen >= 2) return;
+  CHAT_UI.autoCollapsedOnce = true;
+  showChatToggleFab();
+  setChatCollapsed(true);
+}
+
+function notifyChatNewMessage() {
+  if (CHAT_UI.collapsed) {
+    CHAT_UI.unread++;
+    updateChatToggleLabel();
+  }
+}
+
+/* Hook into addMessage to count unread when collapsed */
+(function hookAddMessage(){
+  if (typeof addMessage !== 'function') return;
+  if (addMessage.__chatHooked) return;
+  var orig = addMessage;
+  window.addMessage = function(text, type, extraClass) {
+    var r = orig.apply(this, arguments);
+    if (type === 'bot' && CHAT_UI.collapsed) notifyChatNewMessage();
+    return r;
+  };
+  window.addMessage.__chatHooked = true;
+})();
+
+(function hookAddHtmlMessage(){
+  if (typeof addHtmlMessage !== 'function') return;
+  if (addHtmlMessage.__chatHooked) return;
+  var orig = addHtmlMessage;
+  window.addHtmlMessage = function(html, type, extraClass) {
+    var r = orig.apply(this, arguments);
+    if (type === 'bot' && CHAT_UI.collapsed) notifyChatNewMessage();
+    return r;
+  };
+  window.addHtmlMessage.__chatHooked = true;
+})();
+
+/* ===== UPDATE_CART HANDLER =====
+   Tag attendu dans la réponse Claude : [ACTION:UPDATE_CART {"items":[{"id":"d_1","qty":2},{"name":"Burger","qty":1}],"replace":false}]
+   - "id" = id du plat dans CATALOG.flatItems (préféré)
+   - "name" = recherche fuzzy du plat par nom (fallback)
+   - "qty" >= 0 ; qty=0 retire l'article
+   - "replace" : true = remplace le panier, false = ajoute aux quantités existantes (default)
+*/
+function findDishByName(name) {
+  if (!name || !CATALOG || !CATALOG.flatItems) return null;
+  var needle = String(name).toLowerCase().trim();
+  var ids = Object.keys(CATALOG.flatItems);
+  for (var i = 0; i < ids.length; i++) {
+    var d = CATALOG.flatItems[ids[i]];
+    if (d.name.toLowerCase() === needle) return d;
+  }
+  for (var j = 0; j < ids.length; j++) {
+    var d2 = CATALOG.flatItems[ids[j]];
+    if (d2.name.toLowerCase().indexOf(needle) !== -1 || needle.indexOf(d2.name.toLowerCase()) !== -1) return d2;
+  }
+  return null;
+}
+
+function applyCartUpdate(payload) {
+  if (!payload || !CATALOG || !CATALOG.enabled) return { applied: 0, skipped: 0 };
+  if (payload.replace === true) CATALOG.cart = [];
+  var applied = 0, skipped = 0;
+  var items = Array.isArray(payload.items) ? payload.items : [];
+  items.forEach(function(it){
+    if (!it) { skipped++; return; }
+    var dish = null;
+    if (it.id && CATALOG.flatItems[it.id]) dish = CATALOG.flatItems[it.id];
+    else if (it.name) dish = findDishByName(it.name);
+    if (!dish) { skipped++; return; }
+    var qty = parseInt(it.qty, 10);
+    if (!isFinite(qty)) qty = 1;
+    if (qty <= 0) {
+      CATALOG.cart = CATALOG.cart.filter(function(c){ return c.id !== dish.id; });
+    } else {
+      var existing = CATALOG.cart.find(function(c){ return c.id === dish.id; });
+      if (existing) {
+        if (payload.replace === true) existing.qty = qty;
+        else existing.qty += qty;
+      } else {
+        CATALOG.cart.push({ id: dish.id, name: dish.name, price: dish.price, qty: qty, photo: dish.photo, desc: dish.desc });
+      }
+    }
+    applied++;
+  });
+  if (typeof saveCartToStorage === 'function') saveCartToStorage();
+  if (typeof updateCartUI === 'function') updateCartUI();
+  if (typeof renderCatalogGrid === 'function') renderCatalogGrid();
+  if (typeof renderCartList === 'function') renderCartList();
+  return { applied: applied, skipped: skipped };
+}
+
+/* Détecte et exécute [ACTION:UPDATE_CART {...}] dans une réponse, retourne le texte nettoyé */
+function extractAndApplyCartActions(reply) {
+  if (!reply || typeof reply !== 'string') return reply;
+  var re = /\[ACTION:UPDATE_CART\s+(\{[\s\S]*?\})\s*\]/g;
+  var cleaned = reply;
+  var match;
+  var totalApplied = 0;
+  // Greedy iterations to handle multiple actions
+  var iter = 0;
+  while ((match = re.exec(reply)) && iter < 5) {
+    iter++;
+    try {
+      var payload = JSON.parse(match[1]);
+      var result = applyCartUpdate(payload);
+      totalApplied += result.applied;
+    } catch(e) {
+      console.warn('UPDATE_CART JSON parse failed:', e);
+    }
+    cleaned = cleaned.replace(match[0], '').trim();
+  }
+  if (totalApplied > 0) {
+    // Optional: small confirmation
+    setTimeout(function(){
+      var bar = document.getElementById('cartBar');
+      if (bar) bar.style.animation = 'slideDown .35s ease';
+    }, 100);
+  }
+  return cleaned;
+}
+
+/* Patch sendMessage to intercept UPDATE_CART before display */
+(function patchSendMessageForUpdateCart(){
+  var attempts = 0;
+  function tryPatch() {
+    if (typeof window.detectAndHandleOrder === 'function' && !window.detectAndHandleOrder.__cartPatched) {
+      var origDetect = window.detectAndHandleOrder;
+      window.detectAndHandleOrder = async function(reply) {
+        var stripped = extractAndApplyCartActions(reply || '');
+        return origDetect.call(this, stripped);
+      };
+      window.detectAndHandleOrder.__cartPatched = true;
+    } else if (attempts++ < 50) {
+      setTimeout(tryPatch, 100);
+    }
+  }
+  tryPatch();
+})();
+
+/* Show FAB whenever catalog becomes enabled, and trigger auto-collapse on demo or when no chat history */
+(function watchCatalogReady(){
+  var lastEnabled = false;
+  setInterval(function(){
+    if (typeof CATALOG === 'undefined') return;
+    if (CATALOG.enabled && !lastEnabled) {
+      lastEnabled = true;
+      showChatToggleFab();
+      maybeAutoCollapseChat();
+    } else if (CATALOG.enabled) {
+      // FAB always visible when catalog enabled
+      showChatToggleFab();
+    }
+  }, 500);
+})();
+
 </script>
+
+<button class="chat-toggle-fab" id="chatToggleFab" type="button" onclick="toggleChat()" aria-label="Discuter">
+  <span class="ico" id="chatToggleIco">💬</span>
+  <span id="chatToggleLabel">Parler à l'assistant</span>
+  <span class="badge" id="chatToggleBadge" style="display:none">1</span>
+</button>
+
 </body>
 </html>
